@@ -16,11 +16,13 @@ pub trait Aggregate<Id: Ord> {
     fn repeat<V, F>(&mut self, initial: &V, evolution: F) -> V
     where
         V: 'static + Clone,
-        F: FnOnce(&V) -> V;
+        F: FnOnce(&V, &mut Self) -> V;
 
-    fn branch<V, F>(&mut self, condition: bool, th: F, el: F) -> V
+    fn branch<'a, V, Th, El>(&mut self, condition: bool, th: Th, el: El) -> V
     where
-        F: FnOnce() -> V;
+        Self: 'a,
+        Th: FnOnce(&mut Self) -> V,
+        El: FnOnce(&mut Self) -> V;
 }
 
 pub struct RufiEngine<D: Ord + Hash + Copy, Env, Out> {
@@ -70,26 +72,29 @@ impl<Id: Ord + Hash + Copy, Env, Out> Aggregate<Id> for RufiEngine<Id, Env, Out>
     fn repeat<V, F>(&mut self, initial: &V, evolution: F) -> V
     where
         V: 'static + Clone,
-        F: FnOnce(&V) -> V,
+        F: FnOnce(&V, &mut Self) -> V,
     {
         let current_path = Path::new(self.alignment_stack.current_path());
         let previous_state = self
             .state
             .get(&current_path)
-            .and_then(|s| s.downcast_ref::<V>())
-            .unwrap_or(initial);
-        let updated_state = evolution(previous_state);
-        self.state
-            .insert(current_path, Box::new(updated_state.clone()));
+            .and_then(|f| f.downcast_ref::<V>())
+            .unwrap_or(initial)
+            .clone();
+
+        let updated_state = evolution(&previous_state, self);
+        self.state.insert(current_path, Box::new(updated_state.clone()));
         updated_state
     }
 
-    fn branch<V, F>(&mut self, condition: bool, th: F, el: F) -> V
+    fn branch<'a, V, Th, El>(&mut self, condition: bool, th: Th, el: El) -> V
     where
-        F: FnOnce() -> V,
+        Self: 'a,
+        Th: FnOnce(&mut Self) -> V,
+        El: FnOnce(&mut Self) -> V,
     {
         self.alignment_stack.align(format!("branch/{}", condition));
-        let result = if condition { th() } else { el() };
+        let result = if condition { th(self) } else { el(self) };
         self.alignment_stack.unalign();
         result
     }
@@ -98,4 +103,15 @@ impl<Id: Ord + Hash + Copy, Env, Out> Exportable<Id> for RufiEngine<Id, Env, Out
     fn export(&self) -> OutboundMessage<Id> {
         todo!()
     }
+}
+
+
+fn my_program<Id: Ord + Copy + Hash, A : Aggregate<Id>>(ctx: &mut A) {
+    let my_int = ctx.repeat(&10, |x, ctx| {
+        ctx.branch(
+            0.eq(&0),
+            |ctx| ctx.neighboring(x).local(),
+            |ctx| ctx.neighboring(&50).local()
+        )
+    });
 }
