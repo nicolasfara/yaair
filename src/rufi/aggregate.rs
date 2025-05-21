@@ -59,7 +59,8 @@ impl<Id: Ord + Hash + Copy, Env, Out> Aggregate<Id> for RufiEngine<Id, Env, Out>
         let path = Path::new(self.alignment_stack.current_path());
         let result = Field::new(
             value.clone(),
-            self.inbound.get_at_path::<V>(&path)
+            self.inbound
+                .get_at_path::<V>(&path)
                 .into_iter()
                 .map(|(id, value)| (id, value.clone()))
                 .collect(),
@@ -83,7 +84,8 @@ impl<Id: Ord + Hash + Copy, Env, Out> Aggregate<Id> for RufiEngine<Id, Env, Out>
             .clone();
 
         let updated_state = evolution(&previous_state, self);
-        self.state.insert(current_path, Box::new(updated_state.clone()));
+        self.state
+            .insert(current_path, Box::new(updated_state.clone()));
         updated_state
     }
 
@@ -104,7 +106,6 @@ impl<Id: Ord + Hash + Copy, Env, Out> Exportable<Id> for RufiEngine<Id, Env, Out
         todo!()
     }
 }
-
 
 // fn my_program<Id: Ord + Copy + Hash, A : Aggregate<Id>>(ctx: &mut A) {
 //     let my_int = ctx.repeat(&10, |x, ctx| {

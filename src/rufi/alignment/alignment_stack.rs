@@ -1,5 +1,6 @@
 use std::{
-    collections::{HashMap, VecDeque}, fmt::Display
+    collections::{HashMap, VecDeque},
+    fmt::Display,
 };
 
 use crate::rufi::messages::Path;

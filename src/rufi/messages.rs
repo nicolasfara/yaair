@@ -1,9 +1,13 @@
-use std::{any::Any, collections::{HashMap, HashSet}, hash::Hash};
+use std::{
+    any::Any,
+    collections::{HashMap, HashSet},
+    hash::Hash,
+};
 
 pub struct InboundMessage<Id: Ord + Hash + Copy> {
     underlying: HashMap<Id, ValueTree>,
 }
-impl <Id: Ord + Hash + Copy> InboundMessage<Id> {
+impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
     pub fn new(underlying: HashMap<Id, ValueTree>) -> Self {
         Self { underlying }
     }
@@ -18,9 +22,7 @@ impl <Id: Ord + Hash + Copy> InboundMessage<Id> {
     {
         self.underlying
             .iter()
-            .filter_map(|(id, value_tree)| {
-                value_tree.get::<V>(path).map(|value| (*id, value))
-            })
+            .filter_map(|(id, value_tree)| value_tree.get::<V>(path).map(|value| (*id, value)))
             .collect()
     }
 
@@ -41,7 +43,7 @@ pub struct OutboundMessage<Id: Ord + Hash> {
     pub sender: Id,
     underlying: HashMap<Path, Box<dyn Any>>,
 }
-impl <Id: Ord + Hash> OutboundMessage<Id> {
+impl<Id: Ord + Hash> OutboundMessage<Id> {
     pub fn empty(sender: Id) -> Self {
         Self {
             sender,
@@ -86,7 +88,6 @@ impl ValueTree {
             .and_then(|value| value.downcast_ref::<T>())
     }
 }
-
 
 pub trait Exportable<Id: Ord + Hash> {
     fn export(&self) -> OutboundMessage<Id>;
