@@ -106,12 +106,12 @@ impl<Id: Ord + Hash + Copy, Env, Out> Exportable<Id> for RufiEngine<Id, Env, Out
 }
 
 
-fn my_program<Id: Ord + Copy + Hash, A : Aggregate<Id>>(ctx: &mut A) {
-    let my_int = ctx.repeat(&10, |x, ctx| {
-        ctx.branch(
-            0.eq(&0),
-            |ctx| ctx.neighboring(x).local(),
-            |ctx| ctx.neighboring(&50).local()
-        )
-    });
-}
+// fn my_program<Id: Ord + Copy + Hash, A : Aggregate<Id>>(ctx: &mut A) {
+//     let my_int = ctx.repeat(&10, |x, ctx| {
+//         ctx.branch(
+//             0.eq(&0),
+//             |ctx| ctx.neighboring(x).local(),
+//             |ctx| ctx.neighboring(&50).local()
+//         )
+//     });
+// }

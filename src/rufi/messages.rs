@@ -92,7 +92,7 @@ pub trait Exportable<Id: Ord + Hash> {
     fn export(&self) -> OutboundMessage<Id>;
 }
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct Path {
     tokens: Vec<String>,
 }
