@@ -204,7 +204,7 @@ mod tests {
         vt1.underlying.insert(path.clone(), Box::new(()) as Box<dyn Any>);
         let mut vt2 = ValueTree::empty();
         vt2.underlying.insert(path.clone(), Box::new(()) as Box<dyn Any>);
-        let mut vt3 = ValueTree::empty();
+        let vt3 = ValueTree::empty();
         // vt3 does not have the path
 
         vt_map.insert(1u8, vt1);
