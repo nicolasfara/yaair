@@ -53,15 +53,15 @@ impl AlignmentStack {
         self.stack.pop_back();
     }
 
-    pub(crate) fn align_on<F, R>(&mut self, token: String, body: F) -> R
-    where
-        F: FnOnce() -> R,
-    {
-        self.align(token);
-        let result = body();
-        self.unalign();
-        result
-    }
+    // pub(crate) fn align_on<F, R>(&mut self, token: String, body: F) -> R
+    // where
+    //     F: FnOnce() -> R,
+    // {
+    //     self.align(token);
+    //     let result = body();
+    //     self.unalign();
+    //     result
+    // }
 }
 
 #[cfg(test)]

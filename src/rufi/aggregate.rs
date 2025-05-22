@@ -8,7 +8,7 @@ use crate::rufi::messages::{InboundMessage, Path};
 use super::alignment::alignment_stack::AlignmentStack;
 use super::messages::{Exportable, OutboundMessage};
 
-pub trait Aggregate<Id: Ord> {
+pub trait Aggregate<Id: Ord + Hash + Copy> {
     fn neighboring<V>(&mut self, value: &V) -> Field<Id, V>
     where
         V: 'static + Clone;
