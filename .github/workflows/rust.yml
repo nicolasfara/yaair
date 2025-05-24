@@ -138,3 +138,17 @@ jobs:
           tag_name: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  success:
+    runs-on: ubuntu-latest
+    needs: [check, test, coverage, deny, release]
+    if: >-
+      ${{
+        always() && (
+          contains(join(needs.*.result, ','), 'failure')
+          || !contains(join(needs.*.result, ','), 'cancelled')
+        )
+      }}
+    steps:
+      - name: Verify that there were no failures
+        run: ${{ !contains(join(needs.*.result, ','), 'failure') }}
