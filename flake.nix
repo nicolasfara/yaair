@@ -11,6 +11,14 @@
       let
         pkgs = import nixpkgs { inherit system; };
       in {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          pname = "rufi";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock = {
+            lockFile = ./Cargo.lock;
+          };
+        };
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.rustc
