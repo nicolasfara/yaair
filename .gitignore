@@ -1,8 +1,7 @@
-
-/target
+target/
 # Nix build artifacts
-/result
-/flake.lock
-/*.drv
-/nix-shell-* 
-/nix-build-*
+result
+flake.lock
+*.drv
+nix-shell-* 
+nix-build-*
