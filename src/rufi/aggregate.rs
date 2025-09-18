@@ -34,7 +34,11 @@ pub struct RufiEngine<D: Ord + Hash + Copy, Env, Out> {
     program: fn(Env, &mut Self) -> Out,
 }
 impl<Id: Ord + Hash + Copy, Env, Out> RufiEngine<Id, Env, Out> {
-    pub fn new(local_id: Id, inbound: InboundMessage<Id>, program: fn(Env, &mut Self) -> Out) -> Self {
+    pub fn new(
+        local_id: Id,
+        inbound: InboundMessage<Id>,
+        program: fn(Env, &mut Self) -> Out,
+    ) -> Self {
         Self {
             local_id,
             state: BTreeMap::new(),
@@ -142,19 +146,19 @@ impl<Id: Ord + Hash + Copy, Env, Out> Exportable<Id> for RufiEngine<Id, Env, Out
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::collections::BTreeMap;
     use crate::rufi::messages::InboundMessage;
+    use alloc::collections::BTreeMap;
 
     #[test]
     fn test_repeat_maintains_state_consistency() {
         let inbound = InboundMessage::new(BTreeMap::new());
         let program = |_env: (), _engine: &mut RufiEngine<u8, (), i32>| 42;
         let mut engine = RufiEngine::new(1u8, inbound, program);
-        
+
         // First call should use initial value
         let result1 = engine.repeat(&10i32, |prev, _| prev + 1);
         assert_eq!(result1, 11);
-        
+
         // Second call should use stored state
         let result2 = engine.repeat(&10i32, |prev, _| prev + 1);
         assert_eq!(result2, 12); // Should be 11 + 1, not 10 + 1
@@ -166,10 +170,10 @@ mod tests {
         let inbound = InboundMessage::new(BTreeMap::new());
         let program = |_env: (), _engine: &mut RufiEngine<u8, (), i32>| 42;
         let mut engine = RufiEngine::new(1u8, inbound, program);
-        
+
         // Store an i32 value
         let _result1 = engine.repeat(&10i32, |prev, _| prev + 1);
-        
+
         // Try to access the same path with a different type - should panic
         let _result2 = engine.repeat(&"hello", |prev, _| prev);
     }

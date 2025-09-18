@@ -13,9 +13,9 @@ pub(crate) struct InvocationCoordinate {
 }
 impl InvocationCoordinate {
     pub(crate) fn new(counter: u16, token: impl Into<String>) -> Self {
-        Self { 
-            counter, 
-            token: token.into() 
+        Self {
+            counter,
+            token: token.into(),
         }
     }
 }
