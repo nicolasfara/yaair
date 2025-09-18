@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use alloc::collections::BTreeMap;
 use core::hash::Hash;
 

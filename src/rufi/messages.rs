@@ -1,4 +1,3 @@
-extern crate alloc;
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
 use alloc::collections::BTreeSet;
@@ -43,11 +42,11 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
             .collect()
     }
 }
-pub struct OutboundMessage<Id: Ord + Hash> {
+pub struct OutboundMessage<Id: Ord + Hash + Copy> {
     pub sender: Id,
     underlying: BTreeMap<Path, Box<dyn Any>>,
 }
-impl<Id: Ord + Hash> OutboundMessage<Id> {
+impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
     pub fn empty(sender: Id) -> Self {
         Self {
             sender,
@@ -93,7 +92,7 @@ impl ValueTree {
     }
 }
 
-pub trait Exportable<Id: Ord + Hash> {
+pub trait Exportable<Id: Ord + Hash + Copy> {
     fn export(&self) -> OutboundMessage<Id>;
 }
 

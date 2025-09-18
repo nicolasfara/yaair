@@ -1,5 +1,3 @@
-extern crate alloc;
-
 use crate::rufi::messages::Path;
 use alloc::collections::BTreeMap;
 use alloc::collections::VecDeque;
@@ -14,8 +12,11 @@ pub(crate) struct InvocationCoordinate {
     token: String,
 }
 impl InvocationCoordinate {
-    pub(crate) fn new(counter: u16, token: String) -> Self {
-        Self { counter, token }
+    pub(crate) fn new(counter: u16, token: impl Into<String>) -> Self {
+        Self { 
+            counter, 
+            token: token.into() 
+        }
     }
 }
 impl Display for InvocationCoordinate {
@@ -40,14 +41,14 @@ impl AlignmentStack {
         self.stack.iter().cloned().collect()
     }
 
-    pub(crate) fn align(&mut self, token: String) {
+    pub(crate) fn align(&mut self, token: impl Into<String>) {
         let current_path = Path::new(self.stack.iter().cloned().collect());
         let current_counter = self
             .trace
             .get(&current_path)
             .map(|counter| counter + 1)
             .unwrap_or(0);
-        let invocation_coordinate = InvocationCoordinate::new(current_counter, token);
+        let invocation_coordinate = InvocationCoordinate::new(current_counter, token.into());
         self.stack.push_back(invocation_coordinate);
         self.trace.insert(current_path, current_counter);
     }
@@ -69,18 +70,17 @@ impl AlignmentStack {
 
 #[cfg(test)]
 mod tests {
-    extern crate alloc;
     use alloc::string::ToString;
     #[test]
     fn invocation_coordinate_display() {
-        let invocation_coordinate = super::InvocationCoordinate::new(1, "test".to_string());
+        let invocation_coordinate = super::InvocationCoordinate::new(1, "test");
         assert_eq!(invocation_coordinate.to_string(), "1:test");
     }
 
     #[test]
     fn alignment_stack_simple() {
         let mut stack = super::AlignmentStack::new();
-        stack.align("test".to_string());
+        stack.align("test");
         assert_eq!(stack.current_path().len(), 1);
         assert_eq!(stack.current_path()[0].token, "test");
         stack.unalign();
@@ -90,8 +90,8 @@ mod tests {
     #[test]
     fn alignment_stack_nested() {
         let mut stack = super::AlignmentStack::new();
-        stack.align("outer".to_string());
-        stack.align("inner".to_string());
+        stack.align("outer");
+        stack.align("inner");
         assert_eq!(stack.current_path().len(), 2);
         assert_eq!(stack.current_path()[0].token, "outer");
         assert_eq!(stack.current_path()[1].token, "inner");
@@ -103,12 +103,12 @@ mod tests {
     #[test]
     fn alignment_stack_same_token() {
         let mut stack = super::AlignmentStack::new();
-        stack.align("test".to_string());
+        stack.align("test");
         assert_eq!(stack.current_path()[0].token, "test");
         assert_eq!(stack.current_path()[0].counter, 0);
         stack.unalign();
 
-        stack.align("test".to_string());
+        stack.align("test");
         // print!("{:?}", stack.current_path()); // Removed for no_std compatibility
         assert_eq!(stack.current_path()[0].token, "test");
         assert_eq!(stack.current_path()[0].counter, 1);
