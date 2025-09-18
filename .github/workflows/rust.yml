@@ -93,7 +93,16 @@ jobs:
         run: |
           cargo build
           cargo test
-          grcov . -s . -t lcov --llvm --branch --ignore-not-existing -o lcov.info
+          grcov . \
+            --source-dir . \
+            --binary-path ./target/debug/ \
+            --output-types lcov \
+            --llvm \
+            --branch \
+            --ignore-not-existing \
+            --ignore "/*" \
+            --ignore "*/target/*" \
+            --output-path lcov.info
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
