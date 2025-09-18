@@ -1,14 +1,18 @@
-use std::{
-    any::Any,
-    collections::{HashMap, HashSet},
-    hash::Hash,
-};
+extern crate alloc;
+use alloc::boxed::Box;
+use alloc::collections::BTreeMap;
+use alloc::collections::BTreeSet;
+use alloc::string::String;
+use alloc::string::ToString;
+use alloc::vec::Vec;
+use core::any::Any;
+use core::hash::Hash;
 
 pub struct InboundMessage<Id: Ord + Hash + Copy> {
-    underlying: HashMap<Id, ValueTree>,
+    underlying: BTreeMap<Id, ValueTree>,
 }
 impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
-    pub fn new(underlying: HashMap<Id, ValueTree>) -> Self {
+    pub fn new(underlying: BTreeMap<Id, ValueTree>) -> Self {
         Self { underlying }
     }
 
@@ -16,7 +20,7 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
         self.underlying.get(id)
     }
 
-    pub fn get_at_path<V>(&self, path: &Path) -> HashMap<Id, &V>
+    pub fn get_at_path<V>(&self, path: &Path) -> BTreeMap<Id, &V>
     where
         V: 'static,
     {
@@ -26,7 +30,7 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
             .collect()
     }
 
-    pub fn devices_at_path(&self, path: &Path) -> HashSet<Id> {
+    pub fn devices_at_path(&self, path: &Path) -> BTreeSet<Id> {
         self.underlying
             .iter()
             .filter_map(|(id, value_tree)| {
@@ -41,13 +45,13 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
 }
 pub struct OutboundMessage<Id: Ord + Hash> {
     pub sender: Id,
-    underlying: HashMap<Path, Box<dyn Any>>,
+    underlying: BTreeMap<Path, Box<dyn Any>>,
 }
 impl<Id: Ord + Hash> OutboundMessage<Id> {
     pub fn empty(sender: Id) -> Self {
         Self {
             sender,
-            underlying: HashMap::new(),
+            underlying: BTreeMap::new(),
         }
     }
 
@@ -69,16 +73,16 @@ impl<Id: Ord + Hash> OutboundMessage<Id> {
 }
 
 pub struct ValueTree {
-    underlying: HashMap<Path, Box<dyn Any>>,
+    underlying: BTreeMap<Path, Box<dyn Any>>,
 }
 impl ValueTree {
     pub fn empty() -> Self {
         Self {
-            underlying: HashMap::new(),
+            underlying: BTreeMap::new(),
         }
     }
 
-    pub fn new(underlying: HashMap<Path, Box<dyn Any>>) -> Self {
+    pub fn new(underlying: BTreeMap<Path, Box<dyn Any>>) -> Self {
         Self { underlying }
     }
 
@@ -109,7 +113,6 @@ impl Path {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::{HashMap, HashSet};
 
     fn make_path(tokens: &[&str]) -> Path {
         Path::new(tokens.to_vec())
@@ -123,7 +126,7 @@ mod tests {
         assert_eq!(p1, p2);
         assert_ne!(p1, p3);
 
-        let mut set = HashSet::new();
+        let mut set = BTreeSet::new();
         set.insert(p1);
         assert!(set.contains(&p2));
         assert!(!set.contains(&p3));
@@ -151,7 +154,7 @@ mod tests {
 
     #[test]
     fn test_value_tree_get_and_new() {
-        let mut underlying = HashMap::new();
+        let mut underlying = BTreeMap::new();
         let path = make_path(&["x"]);
         underlying.insert(path.clone(), Box::new(99u8) as Box<dyn Any>);
         let vt = ValueTree::new(underlying);
@@ -170,7 +173,7 @@ mod tests {
 
     #[test]
     fn test_inbound_message_get_and_get_at_path() {
-        let mut vt_map = HashMap::new();
+        let mut vt_map = BTreeMap::new();
         let path = make_path(&["foo"]);
         let mut vt1 = ValueTree::empty();
         vt1.underlying.insert(path.clone(), Box::new(1u32));
@@ -198,12 +201,14 @@ mod tests {
 
     #[test]
     fn test_inbound_message_devices_at_path() {
-        let mut vt_map = HashMap::new();
+        let mut vt_map = BTreeMap::new();
         let path = make_path(&["foo"]);
         let mut vt1 = ValueTree::empty();
-        vt1.underlying.insert(path.clone(), Box::new(()) as Box<dyn Any>);
+        vt1.underlying
+            .insert(path.clone(), Box::new(()) as Box<dyn Any>);
         let mut vt2 = ValueTree::empty();
-        vt2.underlying.insert(path.clone(), Box::new(()) as Box<dyn Any>);
+        vt2.underlying
+            .insert(path.clone(), Box::new(()) as Box<dyn Any>);
         let vt3 = ValueTree::empty();
         // vt3 does not have the path
 

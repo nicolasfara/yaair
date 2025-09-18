@@ -1,3 +1,5 @@
+#![no_std]
+
 pub mod rufi;
 
 pub fn add(left: u64, right: u64) -> u64 {

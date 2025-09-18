@@ -1,9 +1,12 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    fmt::Display,
-};
+extern crate alloc;
 
 use crate::rufi::messages::Path;
+use alloc::collections::BTreeMap;
+use alloc::collections::VecDeque;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::fmt::Display;
+use core::fmt::Formatter;
 
 #[derive(Debug, Clone)]
 pub(crate) struct InvocationCoordinate {
@@ -16,20 +19,20 @@ impl InvocationCoordinate {
     }
 }
 impl Display for InvocationCoordinate {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}:{}", self.counter, self.token)
     }
 }
 
 pub(crate) struct AlignmentStack {
     stack: VecDeque<InvocationCoordinate>,
-    trace: HashMap<Path, u16>,
+    trace: BTreeMap<Path, u16>,
 }
 impl AlignmentStack {
     pub(crate) fn new() -> Self {
         Self {
             stack: VecDeque::new(),
-            trace: HashMap::new(),
+            trace: BTreeMap::new(),
         }
     }
 
@@ -66,6 +69,8 @@ impl AlignmentStack {
 
 #[cfg(test)]
 mod tests {
+    extern crate alloc;
+    use alloc::string::ToString;
     #[test]
     fn invocation_coordinate_display() {
         let invocation_coordinate = super::InvocationCoordinate::new(1, "test".to_string());
@@ -104,7 +109,7 @@ mod tests {
         stack.unalign();
 
         stack.align("test".to_string());
-        print!("{:?}", stack.current_path());
+        // print!("{:?}", stack.current_path()); // Removed for no_std compatibility
         assert_eq!(stack.current_path()[0].token, "test");
         assert_eq!(stack.current_path()[0].counter, 1);
         stack.unalign();

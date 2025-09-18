@@ -1,14 +1,16 @@
-use std::collections::HashMap;
-use std::hash::Hash;
+extern crate alloc;
+
+use alloc::collections::BTreeMap;
+use core::hash::Hash;
 
 #[derive(Debug)]
 pub struct Field<D: Ord + Hash + Copy, V: Clone> {
     default: V,
-    overrides: HashMap<D, V>,
+    overrides: BTreeMap<D, V>,
 }
 
 impl<D: Ord + Hash + Copy, V: Clone> Field<D, V> {
-    pub(crate) fn new(default: V, overrides: HashMap<D, V>) -> Field<D, V> {
+    pub(crate) fn new(default: V, overrides: BTreeMap<D, V>) -> Field<D, V> {
         Field { default, overrides }
     }
 
@@ -21,28 +23,28 @@ impl<D: Ord + Hash + Copy, V: Clone> Field<D, V> {
         O: Clone,
         V2: Clone,
         F: Fn(&V, &V2) -> O,
-        {
-            Field::new(
-                transform(&self.default, &other.default),
-                self.overrides
-                    .iter()
-                    .filter_map(|(k, v)| {
-                        other
-                            .overrides
-                            .get(k)
-                            .map(|v2| (*k, transform(v, v2)))
-                    })
-                    .collect(),
-                )
-        }
-
+    {
+        Field::new(
+            transform(&self.default, &other.default),
+            self.overrides
+                .iter()
+                .filter_map(|(k, v)| other.overrides.get(k).map(|v2| (*k, transform(v, v2))))
+                .collect(),
+        )
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::string::ToString;
+    use alloc::vec::Vec;
+    use alloc::{format, vec};
 
-    fn make_field<D: Ord + Hash + Copy, V: Clone>(default: V, overrides: Vec<(D, V)>) -> Field<D, V> {
+    fn make_field<D: Ord + Hash + Copy, V: Clone>(
+        default: V,
+        overrides: Vec<(D, V)>,
+    ) -> Field<D, V> {
         Field::new(default, overrides.into_iter().collect())
     }
 

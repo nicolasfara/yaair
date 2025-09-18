@@ -1,9 +1,13 @@
-use std::any::Any;
-use std::collections::HashMap;
-use std::hash::Hash;
+extern crate alloc;
 
 use crate::rufi::field::Field;
 use crate::rufi::messages::{InboundMessage, Path};
+use alloc::boxed::Box;
+use alloc::collections::BTreeMap;
+use alloc::format;
+use alloc::string::ToString;
+use core::any::Any;
+use core::hash::Hash;
 
 use super::alignment::alignment_stack::AlignmentStack;
 use super::messages::{Exportable, OutboundMessage};
@@ -27,7 +31,7 @@ pub trait Aggregate<Id: Ord + Hash + Copy> {
 
 pub struct RufiEngine<D: Ord + Hash + Copy, Env, Out> {
     pub local_id: D,
-    state: HashMap<Path, Box<dyn Any>>,
+    state: BTreeMap<Path, Box<dyn Any>>,
     inbound: InboundMessage<D>,
     outbound: OutboundMessage<D>,
     alignment_stack: AlignmentStack,
@@ -37,7 +41,7 @@ impl<Id: Ord + Hash + Copy, Env, Out> RufiEngine<Id, Env, Out> {
     pub fn new(local_id: Id, inbound: InboundMessage<Id>, program: fn(Env, Self) -> Out) -> Self {
         Self {
             local_id,
-            state: HashMap::new(),
+            state: BTreeMap::new(),
             inbound,
             outbound: OutboundMessage::empty(local_id),
             alignment_stack: AlignmentStack::new(),
