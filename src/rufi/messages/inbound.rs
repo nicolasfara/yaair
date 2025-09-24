@@ -1,0 +1,47 @@
+use alloc::collections::{BTreeMap, BTreeSet};
+use core::hash::Hash;
+use crate::rufi::messages::path::Path;
+use crate::rufi::messages::valuetree::ValueTree;
+
+#[derive(Debug)]
+pub struct InboundMessage<Id: Ord + Hash + Copy> {
+    underlying: BTreeMap<Id, ValueTree>,
+}
+impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
+    pub fn new(underlying: BTreeMap<Id, ValueTree>) -> Self {
+        Self { underlying }
+    }
+
+    pub fn get(&self, id: &Id) -> Option<&ValueTree> {
+        self.underlying.get(id)
+    }
+
+    pub fn get_at_path<V>(&self, path: &Path) -> BTreeMap<Id, V>
+    where
+        V: for<'de> serde::Deserialize<'de>,
+    {
+        self.underlying
+            .iter()
+            .filter_map(|(id, value_tree)| value_tree.get::<V>(path).map(|value| (*id, value))).collect()
+    }
+
+    pub fn devices_at_path(&self, path: &Path) -> BTreeSet<Id> {
+        self.underlying
+            .iter()
+            .filter_map(|(id, value_tree)| {
+                if value_tree.get::<()>(path).is_some() {
+                    Some(*id)
+                } else {
+                    None
+                }
+            })
+            .collect()
+    }
+}
+impl <Id: Ord + Hash + Copy> Default for InboundMessage<Id> {
+    fn default() -> Self {
+        Self {
+            underlying: BTreeMap::new(),
+        }
+    }
+}

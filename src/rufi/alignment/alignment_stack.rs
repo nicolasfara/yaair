@@ -1,10 +1,10 @@
-use crate::rufi::messages::Path;
 use alloc::collections::BTreeMap;
 use alloc::collections::VecDeque;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Display;
 use core::fmt::Formatter;
+use crate::rufi::messages::path::Path;
 
 #[derive(Debug, Clone)]
 pub(crate) struct InvocationCoordinate {
@@ -56,16 +56,6 @@ impl AlignmentStack {
     pub(crate) fn unalign(&mut self) {
         self.stack.pop_back();
     }
-
-    // pub(crate) fn align_on<F, R>(&mut self, token: String, body: F) -> R
-    // where
-    //     F: FnOnce() -> R,
-    // {
-    //     self.align(token);
-    //     let result = body();
-    //     self.unalign();
-    //     result
-    // }
 }
 
 #[cfg(test)]
