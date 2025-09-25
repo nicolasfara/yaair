@@ -2,8 +2,9 @@ use crate::rufi::messages::path::Path;
 use alloc::collections::BTreeMap;
 use alloc::vec::Vec;
 use core::hash::Hash;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct OutboundMessage<Id: Ord + Hash + Copy> {
     pub sender: Id,
     underlying: BTreeMap<Path, Vec<u8>>,

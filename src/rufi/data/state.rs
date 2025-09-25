@@ -1,7 +1,7 @@
+use crate::rufi::messages::path::Path;
 use alloc::boxed::Box;
 use alloc::collections::BTreeMap;
 use core::any::Any;
-use crate::rufi::messages::path::Path;
 
 pub struct State {
     last_state: BTreeMap<Path, Box<dyn Any>>,
@@ -34,8 +34,8 @@ impl State {
                     for different value types across iterations.",
                     path,
                     core::any::type_name::<V>()
-                )
-            }
+                ),
+            },
             None => None,
         }
     }
@@ -49,10 +49,10 @@ impl Default for State {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use core::any::Any;
     use crate::rufi::messages::path::Path;
     use alloc::string::ToString;
     use alloc::vec;
+    use core::any::Any;
 
     fn make_path(id: u32) -> Path {
         Path::new(vec![id.to_string()])

@@ -1,16 +1,17 @@
 use crate::rufi::alignment::alignment_stack::AlignmentStack;
+use crate::rufi::data::field::Field;
+use crate::rufi::data::state::State;
 use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::serializer::Serializer;
 use alloc::boxed::Box;
 use alloc::format;
+use alloc::vec::Vec;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
-use crate::rufi::data::field::Field;
-use crate::rufi::data::state::State;
 
-pub trait Aggregate<Id: Ord + Hash + Copy> {
+pub trait Aggregate<Id: Ord + Hash + Copy + Serialize> {
     fn neighboring<V>(&mut self, value: V) -> Field<Id, V>
     where
         V: Serialize + for<'de> Deserialize<'de> + Clone + 'static;
@@ -26,7 +27,7 @@ pub trait Aggregate<Id: Ord + Hash + Copy> {
         El: FnOnce(&mut Self) -> V;
 }
 
-pub struct VM<Id: Ord + Hash + Copy, S: Serializer> {
+pub struct VM<Id: Ord + Hash + Copy + Serialize, S: Serializer> {
     pub local_id: Id,
     state: State,
     inbound: InboundMessage<Id>,
@@ -34,7 +35,7 @@ pub struct VM<Id: Ord + Hash + Copy, S: Serializer> {
     alignment_stack: AlignmentStack,
     serializer: S,
 }
-impl<Id: Ord + Hash + Copy, S: Serializer> VM<Id, S> {
+impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
     pub fn new(local_id: Id, serializer: S) -> Self {
         Self {
             local_id,
@@ -57,15 +58,18 @@ impl<Id: Ord + Hash + Copy, S: Serializer> VM<Id, S> {
         }
     }
 
-    pub fn get_outbound(&self) -> OutboundMessage<Id> {
-        todo!()
+    pub fn get_outbound(&self) -> Vec<u8> {
+        match self.serializer.serialize(&self.outbound) {
+            Ok(serialized) => serialized,
+            Err(err) => panic!("Failed to serialize outbound message: {}", err),
+        }
     }
 
     pub fn set_inbound(&mut self, inbound: InboundMessage<Id>) {
         self.inbound = inbound;
     }
 }
-impl<Id: Ord + Hash + Copy, S: Serializer> Aggregate<Id> for VM<Id, S> {
+impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, S> {
     fn neighboring<V>(&mut self, value: V) -> Field<Id, V>
     where
         V: Serialize + for<'de> Deserialize<'de> + Clone + 'static,
@@ -107,7 +111,8 @@ impl<Id: Ord + Hash + Copy, S: Serializer> Aggregate<Id> for VM<Id, S> {
             None => initial.clone(),
         };
         let updated_state = evolution(previous_state, self);
-        self.state.insert(current_path, Box::new(updated_state.clone()));
+        self.state
+            .insert(current_path, Box::new(updated_state.clone()));
         self.alignment_stack.unalign();
         updated_state
     }

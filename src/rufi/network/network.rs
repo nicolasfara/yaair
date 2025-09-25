@@ -1,9 +1,10 @@
 use crate::rufi::messages::inbound::InboundMessage;
-use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::serializer::Serializer;
+use alloc::vec::Vec;
 use core::hash::Hash;
+use serde::{Deserialize, Serialize};
 
-pub trait Network<Id: Ord + Hash + Copy, S: Serializer> {
-    fn prepare_outbound(&mut self, outbound_message: OutboundMessage<Id>);
+pub trait Network<Id: Ord + Hash + Copy + Serialize + for<'de> Deserialize<'de>, S: Serializer> {
+    fn prepare_outbound(&mut self, outbound_message: Vec<u8>);
     fn prepare_inbound(&mut self) -> InboundMessage<Id>;
 }
