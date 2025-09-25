@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1.0.226", default-features = false, features = ["alloc", "derive"] }
-serde-value = { version = "0.7.0", default-features = false }
+#serde-value = { version = "0.7.0", default-features = false }
 

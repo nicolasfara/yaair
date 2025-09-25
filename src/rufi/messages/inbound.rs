@@ -1,8 +1,8 @@
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::valuetree::ValueTree;
 use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::vec::Vec;
 use core::hash::Hash;
-use serde_value::Value;
 
 #[derive(Debug)]
 pub struct InboundMessage<Id: Ord + Hash + Copy> {
@@ -17,7 +17,7 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
         self.underlying.get(id)
     }
 
-    pub fn get_at_path(&self, path: &Path) -> BTreeMap<Id, Value> {
+    pub fn get_at_path(&self, path: &Path) -> BTreeMap<Id, Vec<u8>> {
         self.underlying
             .iter()
             .filter_map(|(id, value_tree)| value_tree.get(path).map(|value| (*id, value)))

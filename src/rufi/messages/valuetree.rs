@@ -1,10 +1,10 @@
 use crate::rufi::messages::path::Path;
 use alloc::collections::BTreeMap;
-use serde_value::Value;
+use alloc::vec::Vec;
 
 #[derive(Debug)]
 pub struct ValueTree {
-    underlying: BTreeMap<Path, Value>,
+    underlying: BTreeMap<Path, Vec<u8>>,
 }
 
 impl ValueTree {
@@ -14,7 +14,7 @@ impl ValueTree {
         }
     }
 
-    pub fn new(underlying: BTreeMap<Path, Value>) -> Self {
+    pub fn new(underlying: BTreeMap<Path, Vec<u8>>) -> Self {
         Self { underlying }
     }
 
@@ -22,7 +22,7 @@ impl ValueTree {
         self.underlying.contains_key(path)
     }
 
-    pub fn get(&self, path: &Path) -> Option<Value> {
+    pub fn get(&self, path: &Path) -> Option<Vec<u8>> {
         self.underlying.get(path).cloned()
     }
 
