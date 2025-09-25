@@ -1,15 +1,14 @@
 use crate::rufi::alignment::alignment_stack::AlignmentStack;
-use crate::rufi::field::Field;
 use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::serializer::Serializer;
 use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
 use alloc::format;
-use core::any::Any;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
+use crate::rufi::data::field::Field;
+use crate::rufi::data::state::State;
 
 pub trait Aggregate<Id: Ord + Hash + Copy> {
     fn neighboring<V>(&mut self, value: V) -> Field<Id, V>
@@ -29,7 +28,7 @@ pub trait Aggregate<Id: Ord + Hash + Copy> {
 
 pub struct VM<Id: Ord + Hash + Copy, S: Serializer> {
     pub local_id: Id,
-    state: BTreeMap<Path, Box<dyn Any>>,
+    state: State,
     inbound: InboundMessage<Id>,
     outbound: OutboundMessage<Id>,
     alignment_stack: AlignmentStack,
@@ -39,7 +38,7 @@ impl<Id: Ord + Hash + Copy, S: Serializer> VM<Id, S> {
     pub fn new(local_id: Id, serializer: S) -> Self {
         Self {
             local_id,
-            state: BTreeMap::default(),
+            state: State::default(),
             inbound: InboundMessage::default(),
             outbound: OutboundMessage::empty(local_id),
             alignment_stack: AlignmentStack::new(),
@@ -47,8 +46,15 @@ impl<Id: Ord + Hash + Copy, S: Serializer> VM<Id, S> {
         }
     }
 
-    pub fn new_with_state(local_id: Id, state: BTreeMap<Path, Box<dyn Any>>) -> Self {
-        todo!()
+    pub fn new_with_state(local_id: Id, serializer: S, state: State) -> Self {
+        Self {
+            local_id,
+            state,
+            inbound: InboundMessage::default(),
+            outbound: OutboundMessage::empty(local_id),
+            alignment_stack: AlignmentStack::new(),
+            serializer,
+        }
     }
 
     pub fn get_outbound(&self) -> OutboundMessage<Id> {
@@ -56,11 +62,7 @@ impl<Id: Ord + Hash + Copy, S: Serializer> VM<Id, S> {
     }
 
     pub fn set_inbound(&mut self, inbound: InboundMessage<Id>) {
-        todo!()
-    }
-
-    pub fn state_snapshot(&self) -> BTreeMap<Path, Box<dyn Any>> {
-        todo!()
+        self.inbound = inbound;
     }
 }
 impl<Id: Ord + Hash + Copy, S: Serializer> Aggregate<Id> for VM<Id, S> {
@@ -100,29 +102,12 @@ impl<Id: Ord + Hash + Copy, S: Serializer> Aggregate<Id> for VM<Id, S> {
     {
         self.alignment_stack.align("repeat");
         let current_path = Path::new(self.alignment_stack.current_path());
-        let previous_state = match self.state.get(&current_path) {
-            Some(boxed_value) => {
-                match boxed_value.downcast_ref::<V>() {
-                    Some(value) => value.clone(),
-                    None => {
-                        // Type mismatch - this indicates a serious bug in the program logic
-                        // The same path is being used for different types across iterations
-                        panic!(
-                            "Type mismatch in repeat state at path {:?}. \
-                            Expected type {} but found different type in stored state. \\
-                            This usually indicates the same alignment path is being used \
-                            for different value types across iterations.",
-                            current_path,
-                            core::any::type_name::<V>()
-                        );
-                    }
-                }
-            }
+        let previous_state = match self.state.get::<V>(&current_path) {
+            Some(value) => value.clone(),
             None => initial.clone(),
         };
         let updated_state = evolution(previous_state, self);
-        self.state
-            .insert(current_path, Box::new(updated_state.clone()));
+        self.state.insert(current_path, Box::new(updated_state.clone()));
         self.alignment_stack.unalign();
         updated_state
     }
