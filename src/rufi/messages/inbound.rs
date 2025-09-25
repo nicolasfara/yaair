@@ -1,7 +1,8 @@
-use alloc::collections::{BTreeMap, BTreeSet};
-use core::hash::Hash;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::valuetree::ValueTree;
+use alloc::collections::{BTreeMap, BTreeSet};
+use core::hash::Hash;
+use serde_value::Value;
 
 #[derive(Debug)]
 pub struct InboundMessage<Id: Ord + Hash + Copy> {
@@ -16,20 +17,18 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
         self.underlying.get(id)
     }
 
-    pub fn get_at_path<V>(&self, path: &Path) -> BTreeMap<Id, V>
-    where
-        V: for<'de> serde::Deserialize<'de>,
-    {
+    pub fn get_at_path(&self, path: &Path) -> BTreeMap<Id, Value> {
         self.underlying
             .iter()
-            .filter_map(|(id, value_tree)| value_tree.get::<V>(path).map(|value| (*id, value))).collect()
+            .filter_map(|(id, value_tree)| value_tree.get(path).map(|value| (*id, value)))
+            .collect()
     }
 
     pub fn devices_at_path(&self, path: &Path) -> BTreeSet<Id> {
         self.underlying
             .iter()
             .filter_map(|(id, value_tree)| {
-                if value_tree.get::<()>(path).is_some() {
+                if value_tree.contains_key(path) {
                     Some(*id)
                 } else {
                     None
@@ -38,7 +37,7 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
             .collect()
     }
 }
-impl <Id: Ord + Hash + Copy> Default for InboundMessage<Id> {
+impl<Id: Ord + Hash + Copy> Default for InboundMessage<Id> {
     fn default() -> Self {
         Self {
             underlying: BTreeMap::new(),

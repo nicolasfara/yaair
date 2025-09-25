@@ -1,10 +1,10 @@
+use crate::rufi::messages::path::Path;
 use alloc::collections::BTreeMap;
 use alloc::collections::VecDeque;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Display;
 use core::fmt::Formatter;
-use crate::rufi::messages::path::Path;
 
 #[derive(Debug, Clone)]
 pub(crate) struct InvocationCoordinate {

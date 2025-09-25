@@ -17,8 +17,8 @@ impl Path {
 
 #[cfg(test)]
 mod tests {
-    use alloc::collections::BTreeSet;
     use super::*;
+    use alloc::collections::BTreeSet;
 
     fn make_path(tokens: &[&str]) -> Path {
         Path::new(tokens.to_vec())

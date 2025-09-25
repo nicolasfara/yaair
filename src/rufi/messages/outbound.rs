@@ -1,29 +1,23 @@
+use crate::rufi::messages::path::Path;
 use alloc::collections::BTreeMap;
 use core::hash::Hash;
-use serde::Serialize;
 use serde_value::Value;
-use crate::rufi::messages::path::Path;
 
 #[derive(Debug)]
 pub struct OutboundMessage<Id: Ord + Hash + Copy> {
     pub sender: Id,
-    underlying: BTreeMap<Path, Value>
+    underlying: BTreeMap<Path, Value>,
 }
-impl <Id: Ord + Hash + Copy> OutboundMessage<Id> {
+impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
     pub fn empty(sender: Id) -> Self {
-        Self { sender, underlying: BTreeMap::new() }
+        Self {
+            sender,
+            underlying: BTreeMap::new(),
+        }
     }
 
-    pub fn append<V>(&mut self, path: Path, value: V)
-    where
-        V: Serialize,
-    {
-        match serde_value::to_value(value) {
-            Ok(serialized_value) => {
-                self.underlying.insert(path, serialized_value);
-            },
-            Err(err) => panic!("Failed to serialize value: {:?}", err),
-        }
+    pub fn append(&mut self, path: Path, value: Value) {
+        self.underlying.insert(path, value);
     }
 }
 //     pub sender: Id,
@@ -49,5 +43,3 @@ impl <Id: Ord + Hash + Copy> OutboundMessage<Id> {
 //             .and_then(|value| value.downcast_ref::<V>())
 //     }
 // }
-
-
