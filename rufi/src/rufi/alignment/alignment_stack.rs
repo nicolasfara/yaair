@@ -65,7 +65,7 @@ mod tests {
 
     #[test]
     fn invocation_coordinate_display() {
-        let invocation_coordinate = super::InvocationCoordinate::new(1, "test");
+        let invocation_coordinate = InvocationCoordinate::new(1, "test");
         assert_eq!(invocation_coordinate.to_string(), "test:1");
     }
 
@@ -103,7 +103,6 @@ mod tests {
         assert_eq!(stack.current_path().first(), Some(&expected));
         stack.unalign();
         stack.align("test");
-        // print!("{:?}", stack.current_path()); // Removed for no_std compatibility
         let expected_1 = InvocationCoordinate::new(1, "test");
         assert_eq!(stack.current_path().first(), Some(&expected_1));
         stack.unalign();
