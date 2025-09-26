@@ -7,7 +7,7 @@ use core::fmt::Display;
 use core::fmt::Formatter;
 use core::num::Saturating;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub(crate) struct InvocationCoordinate {
     counter: u32,
     token: String,
@@ -61,6 +61,8 @@ impl AlignmentStack {
 #[cfg(test)]
 mod tests {
     use alloc::string::ToString;
+    use crate::rufi::alignment::alignment_stack::InvocationCoordinate;
+
     #[test]
     fn invocation_coordinate_display() {
         let invocation_coordinate = super::InvocationCoordinate::new(1, "test");
@@ -72,7 +74,8 @@ mod tests {
         let mut stack = super::AlignmentStack::new();
         stack.align("test");
         assert_eq!(stack.current_path().len(), 1);
-        assert_eq!(stack.current_path()[0].token, "test");
+        let expected = InvocationCoordinate::new(0, "test");
+        assert_eq!(stack.current_path().first(), Some(&expected));
         stack.unalign();
         assert_eq!(stack.current_path().len(), 0);
     }
@@ -83,25 +86,26 @@ mod tests {
         stack.align("outer");
         stack.align("inner");
         assert_eq!(stack.current_path().len(), 2);
-        assert_eq!(stack.current_path()[0].token, "outer");
-        assert_eq!(stack.current_path()[1].token, "inner");
+        let expected_outer = InvocationCoordinate::new(0, "outer");
+        let expected_inner = InvocationCoordinate::new(0, "inner");
+        assert_eq!(stack.current_path().first(), Some(&expected_outer));
+        assert_eq!(stack.current_path().get(1), Some(&expected_inner));
         stack.unalign();
         assert_eq!(stack.current_path().len(), 1);
-        assert_eq!(stack.current_path()[0].token, "outer");
+        assert_eq!(stack.current_path().first(), Some(&expected_outer));
     }
 
     #[test]
     fn alignment_stack_same_token() {
         let mut stack = super::AlignmentStack::new();
         stack.align("test");
-        assert_eq!(stack.current_path()[0].token, "test");
-        assert_eq!(stack.current_path()[0].counter, 0);
+        let expected = InvocationCoordinate::new(0, "test");
+        assert_eq!(stack.current_path().first(), Some(&expected));
         stack.unalign();
-
         stack.align("test");
         // print!("{:?}", stack.current_path()); // Removed for no_std compatibility
-        assert_eq!(stack.current_path()[0].token, "test");
-        assert_eq!(stack.current_path()[0].counter, 1);
+        let expected_1 = InvocationCoordinate::new(1, "test");
+        assert_eq!(stack.current_path().first(), Some(&expected_1));
         stack.unalign();
     }
 }

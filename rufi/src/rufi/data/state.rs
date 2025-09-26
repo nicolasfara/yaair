@@ -54,6 +54,7 @@ mod tests {
     use alloc::string::ToString;
     use alloc::vec;
     use core::any::Any;
+    use core::f32::consts::PI;
 
     fn make_path(id: u32) -> Path {
         Path::new(vec![id.to_string()])
@@ -81,7 +82,7 @@ mod tests {
     fn test_get_type_mismatch_panics() {
         let mut state = State::new();
         let path = make_path(2);
-        state.insert(path.clone(), 3.14f32);
+        state.insert(path.clone(), PI);
         // Panic expected here due to type mismatch
         let _ = state.get::<u32>(&path);
     }

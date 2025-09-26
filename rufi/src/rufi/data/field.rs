@@ -57,7 +57,7 @@ mod tests {
         let f1 = make_field(1u8, vec![(10u8, 2u8), (20u8, 3u8)]);
         let f2 = make_field(4u8, vec![(10u8, 5u8), (30u8, 6u8)]);
         // Only key 10u8 is present in both overrides
-        let result = f1.aligned_map(&f2, |a, b| *a as u16 + *b as u16);
+        let result = f1.aligned_map(&f2, |a, b| u16::from(*a) + u16::from(*b));
 
         // Default should be 1 + 4 = 5
         assert_eq!(result.local(), &5u16);
@@ -71,7 +71,7 @@ mod tests {
     fn test_aligned_map_no_common_keys() {
         let f1 = make_field(1u8, vec![(10u8, 2u8)]);
         let f2 = make_field(4u8, vec![(20u8, 5u8)]);
-        let result = f1.aligned_map(&f2, |a, b| *a as i32 - *b as i32);
+        let result = f1.aligned_map(&f2, |a, b| i32::from(*a) - i32::from(*b));
 
         // Default should be 1 - 4 = -3
         assert_eq!(result.local(), &-3i32);
@@ -101,7 +101,7 @@ mod tests {
     fn test_aligned_map_with_different_types() {
         let f1 = make_field("a", vec![(1, "b"), (2, "c")]);
         let f2 = make_field(10, vec![(1, 20), (2, 30)]);
-        let result = f1.aligned_map(&f2, |s, n| format!("{}{}", s, n));
+        let result = f1.aligned_map(&f2, |s, n| format!("{s}{n}"));
 
         assert_eq!(result.local(), &"a10".to_string());
         assert_eq!(result.overrides.get(&1), Some(&"b20".to_string()));
