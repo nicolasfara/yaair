@@ -22,7 +22,9 @@ impl Display for Path {
 }
 impl From<&str> for Path {
     fn from(value: &str) -> Self {
-        Self { tokens: value.split('/').map(String::from).collect() }
+        Self {
+            tokens: value.split('/').map(String::from).collect(),
+        }
     }
 }
 

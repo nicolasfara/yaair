@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod aggregate_json_test {
-    use rufi::rufi::aggregate::{VM, Aggregate};
-    use rufi::rufi::messages::serializer::Serializer;
-    use serde::{Serialize, Deserialize};
+    use rufi::rufi::aggregate::{Aggregate, VM};
     use rufi::rufi::messages::outbound::OutboundMessage;
+    use rufi::rufi::messages::serializer::Serializer;
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
     struct Dummy {
@@ -26,11 +26,16 @@ mod aggregate_json_test {
     fn test_neighboring_serialization() {
         let serializer = JsonSerializer;
         let mut vm = VM::new(1u32, JsonSerializer);
-        let value = Dummy { a: 7, b: "test".to_string() };
+        let value = Dummy {
+            a: 7,
+            b: "test".to_string(),
+        };
         let _ = vm.neighboring(value.clone());
         let outbound_bytes = vm.get_outbound();
         // Deserialize outbound as OutboundMessage
-        let outbound = serializer.deserialize::<OutboundMessage<u32>>(&outbound_bytes).unwrap();
+        let outbound = serializer
+            .deserialize::<OutboundMessage<u32>>(&outbound_bytes)
+            .unwrap();
         let val = outbound.at(&"neighboring:0".into()).unwrap();
         let deserialized: Dummy = serializer.deserialize(val).unwrap();
         assert_eq!(deserialized, value.clone());
