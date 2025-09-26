@@ -4,7 +4,7 @@ use crate::rufi::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
-struct Engine<Id, Out, Env, S, Net>
+pub struct Engine<Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
@@ -22,7 +22,7 @@ where
     S: Serializer,
     Net: Network<Id, S>,
 {
-    fn new(
+    pub fn new(
         local_id: Id,
         network: Net,
         environment: Env,
@@ -38,11 +38,11 @@ where
         }
     }
 
-    const fn get_local_id(&self) -> Id {
+    pub const fn get_local_id(&self) -> Id {
         self.local_id
     }
 
-    fn cycle(&mut self) -> Out {
+    pub fn cycle(&mut self) -> Out {
         let inbound = self.network.prepare_inbound();
         self.vm.set_inbound(inbound);
         let result = (self.program)(&self.environment, &mut self.vm);

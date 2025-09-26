@@ -2,7 +2,7 @@ use rufi::rufi::messages::serializer::Serializer;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "json")]
-struct JsonSerializer;
+pub struct JsonSerializer;
 impl Serializer for JsonSerializer {
     type Error = serde_json::Error;
 
