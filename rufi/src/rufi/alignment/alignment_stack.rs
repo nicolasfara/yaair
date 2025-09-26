@@ -60,8 +60,8 @@ impl AlignmentStack {
 
 #[cfg(test)]
 mod tests {
-    use alloc::string::ToString;
     use crate::rufi::alignment::alignment_stack::InvocationCoordinate;
+    use alloc::string::ToString;
 
     #[test]
     fn invocation_coordinate_display() {
