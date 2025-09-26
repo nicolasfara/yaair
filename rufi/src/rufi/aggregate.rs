@@ -94,7 +94,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
             Ok(val) => val,
             Err(err) => panic!("Failed to serialize neighboring value: {}", err),
         };
-        self.outbound.append(path, serialized_value);
+        self.outbound.append(&path, serialized_value);
         self.alignment_stack.unalign();
         result
     }

@@ -1,5 +1,6 @@
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
+use core::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Clone, Serialize, Deserialize)]
@@ -12,6 +13,16 @@ impl Path {
         Self {
             tokens: tokens.into_iter().map(|t| t.to_string()).collect(),
         }
+    }
+}
+impl Display for Path {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{}", self.tokens.join("/"))
+    }
+}
+impl From<&str> for Path {
+    fn from(value: &str) -> Self {
+        Self { tokens: value.split('/').map(String::from).collect() }
     }
 }
 

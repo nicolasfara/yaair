@@ -4,7 +4,7 @@ use crate::rufi::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
-pub struct Engine<Id, Out, Env, S, Net>
+struct Engine<Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
