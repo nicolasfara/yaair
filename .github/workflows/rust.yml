@@ -38,7 +38,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: 🧐 Clippy
-        run: cargo clippy --workspace --all-targets --all-features
+        run: cargo clippy --workspace --all-targets
 
       - name: 📚 Docs check
         run: cargo doc --workspace --no-deps --document-private-items
@@ -141,13 +141,13 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.event.head_commit.message, 'release:')
-        with:
-          tag_name: ${{ github.sha }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Create GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        if: startsWith(github.event.head_commit.message, 'release:')
+#        with:
+#          tag_name: ${{ github.sha }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   success:
     runs-on: ubuntu-latest

@@ -2,18 +2,18 @@ use alloc::collections::BTreeMap;
 use core::hash::Hash;
 
 #[derive(Debug)]
-pub struct Field<D: Ord + Hash + Copy, V: Clone> {
+pub struct Field<D: Ord + Hash + Copy, V> {
     default: V,
     overrides: BTreeMap<D, V>,
 }
 
-impl<D: Ord + Hash + Copy, V: Clone> Field<D, V> {
-    pub(crate) fn new(default: V, overrides: BTreeMap<D, V>) -> Field<D, V> {
-        Field { default, overrides }
+impl<D: Ord + Hash + Copy, V> Field<D, V> {
+    pub(crate) const fn new(default: V, overrides: BTreeMap<D, V>) -> Self {
+        Self { default, overrides }
     }
 
-    pub fn local(&self) -> V {
-        self.default.clone()
+    pub const fn local(&self) -> &V {
+        &self.default
     }
 
     pub fn aligned_map<O, V2, F>(&self, other: &Field<D, V2>, transform: F) -> Field<D, O>
@@ -49,7 +49,7 @@ mod tests {
     #[test]
     fn test_local_returns_default() {
         let field = make_field(42u8, vec![(1u8, 100u8), (2u8, 200u8)]);
-        assert_eq!(field.local(), 42u8);
+        assert_eq!(field.local(), &42u8);
     }
 
     #[test]
@@ -57,10 +57,10 @@ mod tests {
         let f1 = make_field(1u8, vec![(10u8, 2u8), (20u8, 3u8)]);
         let f2 = make_field(4u8, vec![(10u8, 5u8), (30u8, 6u8)]);
         // Only key 10u8 is present in both overrides
-        let result = f1.aligned_map(&f2, |a, b| *a as u16 + *b as u16);
+        let result = f1.aligned_map(&f2, |a, b| u16::from(*a) + u16::from(*b));
 
         // Default should be 1 + 4 = 5
-        assert_eq!(result.local(), 5u16);
+        assert_eq!(result.local(), &5u16);
 
         // Only key 10u8 should be present in overrides, with value 2 + 5 = 7
         assert_eq!(result.overrides.len(), 1);
@@ -71,10 +71,10 @@ mod tests {
     fn test_aligned_map_no_common_keys() {
         let f1 = make_field(1u8, vec![(10u8, 2u8)]);
         let f2 = make_field(4u8, vec![(20u8, 5u8)]);
-        let result = f1.aligned_map(&f2, |a, b| *a as i32 - *b as i32);
+        let result = f1.aligned_map(&f2, |a, b| i32::from(*a) - i32::from(*b));
 
         // Default should be 1 - 4 = -3
-        assert_eq!(result.local(), -3i32);
+        assert_eq!(result.local(), &-3i32);
 
         // No common keys, so overrides should be empty
         assert!(result.overrides.is_empty());
@@ -87,7 +87,7 @@ mod tests {
         let result = f1.aligned_map(&f2, |a, b| a + b);
 
         // Default: 0 + 100 = 100
-        assert_eq!(result.local(), 100);
+        assert_eq!(result.local(), &100);
 
         // Common keys: 2 and 3
         assert_eq!(result.overrides.len(), 2);
@@ -101,9 +101,9 @@ mod tests {
     fn test_aligned_map_with_different_types() {
         let f1 = make_field("a", vec![(1, "b"), (2, "c")]);
         let f2 = make_field(10, vec![(1, 20), (2, 30)]);
-        let result = f1.aligned_map(&f2, |s, n| format!("{}{}", s, n));
+        let result = f1.aligned_map(&f2, |s, n| format!("{s}{n}"));
 
-        assert_eq!(result.local(), "a10".to_string());
+        assert_eq!(result.local(), &"a10".to_string());
         assert_eq!(result.overrides.get(&1), Some(&"b20".to_string()));
         assert_eq!(result.overrides.get(&2), Some(&"c30".to_string()));
     }
@@ -114,7 +114,7 @@ mod tests {
         let f2 = make_field(2, vec![]);
         let result = f1.aligned_map(&f2, |a, b| a * b);
 
-        assert_eq!(result.local(), 2);
+        assert_eq!(result.local(), &2);
         assert!(result.overrides.is_empty());
     }
 }

@@ -1,0 +1,18 @@
+[package]
+name = "rufi_serde"
+version = "0.1.0"
+edition = "2021"
+authors = [
+    "Nicolas Farabegoli <nicolas.farabegoli@gmail.com>"
+]
+license = "Apache-2.0"
+
+[dependencies]
+rufi = { path = "../rufi", version = "0.1.0" }
+serde = { version = "1.0.227" }
+serde_json = { version = "1.0.145" }
+
+[features]
+default = [ "json" ]
+
+json = []

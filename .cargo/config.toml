@@ -1,0 +1,90 @@
+[target.'cfg(all())']
+rustflags = [
+    # === CLIPPY LINT LEVELS ===
+
+    # Enable all clippy lints by default, then selectively allow/deny
+    "-W", "clippy::all",
+    "-W", "clippy::pedantic",
+    "-W", "clippy::nursery",
+    "-W", "clippy::cargo",
+
+    # === DENY (errors) ===
+    # These are serious issues that should always be fixed
+    "-D", "clippy::unwrap_used",
+    "-D", "clippy::expect_used",
+    "-D", "clippy::unimplemented",
+    "-D", "clippy::todo",
+    "-D", "clippy::unreachable",
+    "-D", "clippy::indexing_slicing",
+    "-D", "clippy::arithmetic_side_effects", # Consider allowing for specific use cases
+    "-D", "clippy::float_arithmetic",   # Consider allowing for specific use cases
+    "-D", "clippy::as_conversions",
+    "-D", "clippy::clone_on_ref_ptr",
+    "-D", "clippy::create_dir",
+    "-D", "clippy::dbg_macro",
+    "-D", "clippy::debug_assert_with_mut_call",
+    "-D", "clippy::exit",
+    "-D", "clippy::filetype_is_file",
+    "-D", "clippy::float_cmp_const",
+    "-D", "clippy::get_unwrap",
+    "-D", "clippy::lossy_float_literal",
+    "-D", "clippy::mem_forget",
+    "-D", "clippy::missing_docs_in_private_items", # Remove if too strict
+    "-D", "clippy::multiple_inherent_impl",
+    "-D", "clippy::print_stdout",
+    "-D", "clippy::print_stderr",
+    "-D", "clippy::use_debug",
+    "-D", "clippy::wildcard_enum_match_arm",
+
+    # === WARN (warnings) ===
+    # These should be addressed but won't break the build
+    "-W", "clippy::cognitive_complexity",
+    "-W", "clippy::too_many_lines",
+    "-W", "clippy::too_many_arguments",
+    "-W", "clippy::type_complexity",
+    "-W", "clippy::many_single_char_names",
+    "-W", "clippy::similar_names",
+    "-W", "clippy::shadow_unrelated",
+    "-W", "clippy::shadow_reuse",
+    "-W", "clippy::shadow_same",
+    "-W", "clippy::string_add",
+    "-W", "clippy::string_add_assign",
+    "-W", "clippy::string_to_string",
+    "-W", "clippy::unnecessary_self_imports",
+    "-W", "clippy::unneeded_field_pattern",
+    "-W", "clippy::verbose_file_reads",
+
+    # === ALLOW (selectively disabled) ===
+    # These can be noisy or have false positives
+    "-A", "clippy::blanket_clippy_restriction_lints",
+    "-A", "clippy::implicit_return",
+    "-A", "clippy::missing_docs_in_private_items", # Uncomment if you enabled above
+    "-A", "clippy::missing_inline_in_public_items",
+    "-A", "clippy::exhaustive_structs",
+    "-A", "clippy::exhaustive_enums",
+    "-A", "clippy::module_name_repetitions",
+    "-A", "clippy::single_char_lifetime_names",
+    "-A", "clippy::std_instead_of_core", # Allow if not writing no_std code
+    "-A", "clippy::std_instead_of_alloc", # Allow if not writing no_std code
+    "-A", "clippy::separated_literal_suffix",
+    "-A", "clippy::decimal_literal_representation",
+    "-A", "clippy::min_ident_chars",
+
+    # Pedantic lints that can be noisy
+    "-A", "clippy::must_use_candidate",
+    "-A", "clippy::return_self_not_must_use",
+    "-A", "clippy::unused_self",
+    "-A", "clippy::doc_markdown", # Can have false positives
+    "-A", "clippy::items_after_statements",
+    "-A", "clippy::cast_precision_loss",
+    "-A", "clippy::cast_possible_truncation",
+    "-A", "clippy::cast_sign_loss",
+    "-A", "clippy::cast_possible_wrap",
+    "-A", "clippy::struct_excessive_bools",
+    "-A", "clippy::fn_params_excessive_bools",
+    "-A", "clippy::if_not_else",
+    "-A", "clippy::inline_always",
+    "-A", "clippy::match_same_arms", # Can conflict with readability
+    "-A", "clippy::missing_panics_doc",
+    "-A", "clippy::missing_errors_doc",
+]

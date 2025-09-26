@@ -5,3 +5,4 @@ flake.lock
 *.drv
 nix-shell-* 
 nix-build-*
+Cargo.lock

@@ -1,6 +1,11 @@
-[package]
-name = "rufi"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [
+    "rufi",
+    "rufi_serde",
+]
+resolver = "2"
 
-[dependencies]
+#[patch.crates-io]
+#rufi = { path = "rufi" }
+
+[workspace.dependencies]
