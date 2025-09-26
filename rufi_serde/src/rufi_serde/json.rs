@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use rufi::rufi::messages::serializer::Serializer;
+use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "json")]
 struct JsonSerializer;
@@ -10,7 +10,7 @@ impl Serializer for JsonSerializer {
         serde_json::to_vec(value)
     }
 
-    fn deserialize<T: for<'de> Deserialize<'de>>(&self, value: &Vec<u8>) -> Result<T, Self::Error> {
+    fn deserialize<T: for<'de> Deserialize<'de>>(&self, value: &[u8]) -> Result<T, Self::Error> {
         serde_json::from_slice(value)
     }
 }
@@ -18,7 +18,7 @@ impl Serializer for JsonSerializer {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde::{Serialize, Deserialize};
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, PartialEq, Serialize, Deserialize)]
     struct Dummy {
@@ -29,7 +29,10 @@ mod tests {
     #[test]
     fn test_serialize_deserialize_struct() {
         let serializer = JsonSerializer;
-        let value = Dummy { a: 42, b: "ciao".to_string() };
+        let value = Dummy {
+            a: 42,
+            b: "ciao".to_string(),
+        };
         let bytes = serializer.serialize(&value).expect("serialize ok");
         let result: Dummy = serializer.deserialize(&bytes).expect("deserialize ok");
         assert_eq!(value, result);

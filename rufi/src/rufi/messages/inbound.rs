@@ -9,7 +9,7 @@ pub struct InboundMessage<Id: Ord + Hash + Copy> {
     underlying: BTreeMap<Id, ValueTree>,
 }
 impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
-    pub fn new(underlying: BTreeMap<Id, ValueTree>) -> Self {
+    pub const fn new(underlying: BTreeMap<Id, ValueTree>) -> Self {
         Self { underlying }
     }
 

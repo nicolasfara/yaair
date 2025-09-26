@@ -1,0 +1,75 @@
+# Clippy configuration file
+# Place this file in your project root as `clippy.toml` or `.clippy.toml`
+
+# === GENERAL SETTINGS ===
+
+# Maximum allowed cognitive complexity for a function
+cognitive-complexity-threshold = 30
+
+# Maximum number of lines for a function
+too-many-lines-threshold = 100
+
+# Maximum number of arguments for a function
+too-many-arguments-threshold = 7
+
+# Maximum number of variants for an enum
+enum-variant-size-threshold = 200
+
+# Maximum size difference between enum variants
+large-error-threshold = 128
+
+# === NAMING CONVENTIONS ===
+
+# Disallowed names (variables that shouldn't be used)
+disallowed-names = ["foo", "baz", "quux", "lorem", "ipsum"]
+
+# Enforce specific case for acronyms in names
+upper-case-acronyms-aggressive = false
+
+# === DOCUMENTATION ===
+
+# Require documentation for public items
+missing-docs-in-crate-items = false
+
+# Check for common documentation issues
+doc-valid-idents = [
+    "KiB", "MiB", "GiB", "TiB", "PiB", "EiB",
+    "API", "APIs", "HTTP", "HTTPS", "URL", "URLs",
+    "JSON", "XML", "YAML", "TOML", "CSV",
+    "UTF", "ASCII", "UUID", "GUID",
+    "OS", "CPU", "GPU", "RAM", "SSD", "HDD",
+    "SQL", "NoSQL", "CRUD",
+    "OAuth", "JWT", "CORS",
+    "WebGL", "OpenGL", "DirectX",
+]
+
+# === PEDANTIC SETTINGS ===
+
+# Allow certain pedantic lints that can be noisy
+avoid-breaking-exported-api = true
+allow-expect-in-tests = true
+allow-unwrap-in-tests = true
+
+# === TYPE COMPLEXITY ===
+
+# Maximum allowed type complexity
+type-complexity-threshold = 250
+
+# === PERFORMANCE ===
+
+# Threshold for `trivially_copy_pass_by_ref`
+trivial-copy-size-limit = 64
+
+# Threshold for suggesting `pass_by_value_instead_of_ref`
+pass-by-value-size-limit = 256
+
+# === STYLE PREFERENCES ===
+
+# Single char lifetime names threshold
+single-char-binding-names-threshold = 4
+
+# === SAFETY ===
+
+# Allow certain patterns that might otherwise trigger warnings
+allow-mixed-uninlined-format-args = true
+suppress-restriction-lint-in-const = false

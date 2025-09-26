@@ -1,6 +1,6 @@
 use crate::rufi::aggregate::VM;
 use crate::rufi::messages::serializer::Serializer;
-use crate::rufi::network::network::Network;
+use crate::rufi::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
@@ -38,7 +38,7 @@ where
         }
     }
 
-    fn get_local_id(&self) -> Id {
+    const fn get_local_id(&self) -> Id {
         self.local_id
     }
 
@@ -76,7 +76,7 @@ mod tests {
         }
         fn deserialize<T: for<'de> serde::Deserialize<'de>>(
             &self,
-            _value: &Vec<u8>,
+            _value: &[u8],
         ) -> Result<T, Self::Error> {
             Err(DummyError)
         }
