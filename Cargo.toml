@@ -1,9 +1,9 @@
-[package]
-name = "rufi"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = [
+    "rufi"
+]
 
-[dependencies]
-serde = { version = "1.0.226", default-features = false, features = ["alloc", "derive"] }
-#serde-value = { version = "0.7.0", default-features = false }
+#[patch.crates-io]
+#rufi = { path = "rufi" }
 
+[workspace.dependencies]
