@@ -10,7 +10,7 @@ pub struct OutboundMessage<Id: Ord + Hash + Copy> {
     underlying: BTreeMap<Path, Vec<u8>>,
 }
 impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
-    pub fn empty(sender: Id) -> Self {
+    pub const fn empty(sender: Id) -> Self {
         Self {
             sender,
             underlying: BTreeMap::new(),

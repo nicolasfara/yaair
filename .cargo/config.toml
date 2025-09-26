@@ -17,7 +17,7 @@ rustflags = [
     "-D", "clippy::todo",
     "-D", "clippy::unreachable",
     "-D", "clippy::indexing_slicing",
-    "-D", "clippy::integer_arithmetic", # Consider allowing for specific use cases
+    "-D", "clippy::arithmetic_side_effects", # Consider allowing for specific use cases
     "-D", "clippy::float_arithmetic",   # Consider allowing for specific use cases
     "-D", "clippy::as_conversions",
     "-D", "clippy::clone_on_ref_ptr",
@@ -40,7 +40,6 @@ rustflags = [
     # === WARN (warnings) ===
     # These should be addressed but won't break the build
     "-W", "clippy::cognitive_complexity",
-    "-W", "clippy::cyclomatic_complexity",
     "-W", "clippy::too_many_lines",
     "-W", "clippy::too_many_arguments",
     "-W", "clippy::type_complexity",

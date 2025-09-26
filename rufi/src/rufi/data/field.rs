@@ -8,11 +8,11 @@ pub struct Field<D: Ord + Hash + Copy, V> {
 }
 
 impl<D: Ord + Hash + Copy, V> Field<D, V> {
-    pub(crate) fn new(default: V, overrides: BTreeMap<D, V>) -> Field<D, V> {
-        Field { default, overrides }
+    pub(crate) const fn new(default: V, overrides: BTreeMap<D, V>) -> Self {
+        Self { default, overrides }
     }
 
-    pub fn local(&self) -> &V {
+    pub const fn local(&self) -> &V {
         &self.default
     }
 

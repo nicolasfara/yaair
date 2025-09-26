@@ -8,13 +8,13 @@ pub struct ValueTree {
 }
 
 impl ValueTree {
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             underlying: BTreeMap::new(),
         }
     }
 
-    pub fn new(underlying: BTreeMap<Path, Vec<u8>>) -> Self {
+    pub const fn new(underlying: BTreeMap<Path, Vec<u8>>) -> Self {
         Self { underlying }
     }
 

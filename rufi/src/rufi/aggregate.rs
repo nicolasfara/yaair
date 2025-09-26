@@ -106,10 +106,10 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
     {
         self.alignment_stack.align("repeat");
         let current_path = Path::new(self.alignment_stack.current_path());
-        let previous_state = match self.state.get::<V>(&current_path) {
-            Some(value) => value.clone(),
-            None => initial.clone(),
-        };
+        let previous_state = self
+            .state
+            .get::<V>(&current_path)
+            .map_or(initial, Clone::clone);
         let updated_state = evolution(previous_state, self);
         self.state
             .insert(current_path, Box::new(updated_state.clone()));
@@ -122,7 +122,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
         Th: FnOnce(&mut Self) -> V,
         El: FnOnce(&mut Self) -> V,
     {
-        self.alignment_stack.align(format!("branch/{}", condition));
+        self.alignment_stack.align(format!("branch/{condition}"));
         let result = if condition { th(self) } else { el(self) };
         self.alignment_stack.unalign();
         result

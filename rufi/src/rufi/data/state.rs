@@ -24,20 +24,21 @@ impl State {
     }
 
     pub fn get<V: Any>(&self, path: &Path) -> Option<&V> {
-        match self.last_state.get(path) {
-            Some(value) => match value.downcast_ref::<V>() {
-                Some(v) => Some(v),
-                None => panic!(
-                    "Type mismatch in repeat state at path {:?}. \
-                    Expected type {} but found different type in stored state. \\
-                    This usually indicates the same alignment path is being used \
-                    for different value types across iterations.",
-                    path,
-                    core::any::type_name::<V>()
-                ),
-            },
-            None => None,
-        }
+        self.last_state.get(path).and_then(|value| {
+            value.downcast_ref::<V>().map_or_else(
+                || {
+                    panic!(
+                        "Type mismatch in repeat state at path {:?}. \
+                  Expected type {} but found different type in stored state. \\
+                  This usually indicates the same alignment path is being used \
+                  for different value types across iterations.",
+                        path,
+                        core::any::type_name::<V>()
+                    )
+                },
+                Some,
+            )
+        })
     }
 }
 impl Default for State {

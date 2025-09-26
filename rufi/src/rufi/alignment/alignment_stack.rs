@@ -30,7 +30,7 @@ pub(crate) struct AlignmentStack {
     trace: BTreeMap<Path, u16>,
 }
 impl AlignmentStack {
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             stack: VecDeque::new(),
             trace: BTreeMap::new(),
@@ -46,8 +46,7 @@ impl AlignmentStack {
         let current_counter = self
             .trace
             .get(&current_path)
-            .map(|counter| counter + 1)
-            .unwrap_or(0);
+            .map_or(0, |counter| counter + 1);
         let invocation_coordinate = InvocationCoordinate::new(current_counter, token.into());
         self.stack.push_back(invocation_coordinate);
         self.trace.insert(current_path, current_counter);
