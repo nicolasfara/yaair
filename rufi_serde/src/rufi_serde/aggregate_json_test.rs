@@ -38,6 +38,6 @@ mod aggregate_json_test {
             .unwrap();
         let val = outbound.at(&"neighboring:0".into()).unwrap();
         let deserialized: Dummy = serializer.deserialize(val).unwrap();
-        assert_eq!(deserialized, value.clone());
+        assert_eq!(deserialized, value);
     }
 }

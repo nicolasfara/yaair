@@ -96,8 +96,8 @@ mod tests {
     #[test]
     fn test_from_snapshot() {
         let path = make_path(4);
-        let mut snapshot = BTreeMap::new();
-        snapshot.insert(path.clone(), Box::new(99u8) as Box<dyn Any>);
+        let mut snapshot: BTreeMap<Path, Box<dyn Any>> = BTreeMap::new();
+        snapshot.insert(path.clone(), Box::new(99u8));
         let state = State::from_snapshot(snapshot);
         assert_eq!(state.get::<u8>(&path), Some(&99u8));
     }
