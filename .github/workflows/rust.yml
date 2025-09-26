@@ -141,13 +141,13 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.event.head_commit.message, 'release:')
-        with:
-          tag_name: ${{ github.sha }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Create GitHub Release
+#        uses: softprops/action-gh-release@v2
+#        if: startsWith(github.event.head_commit.message, 'release:')
+#        with:
+#          tag_name: ${{ github.sha }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   success:
     runs-on: ubuntu-latest
