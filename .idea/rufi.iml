@@ -3,8 +3,9 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/examples" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/rufi_core/src" isTestSource="false" />
-      <excludeFolder url="file://$MODULE_DIR$/rufi_core/target" />
+      <sourceFolder url="file://$MODULE_DIR$/rufi/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/rufi_serde/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/rufi/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

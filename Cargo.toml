@@ -1,7 +1,9 @@
 [workspace]
 members = [
-    "rufi"
+    "rufi",
+    "rufi_serde",
 ]
+resolver = "2"
 
 #[patch.crates-io]
 #rufi = { path = "rufi" }
