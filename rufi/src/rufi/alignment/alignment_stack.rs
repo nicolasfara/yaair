@@ -5,14 +5,15 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Display;
 use core::fmt::Formatter;
+use core::num::Saturating;
 
 #[derive(Debug, Clone)]
 pub(crate) struct InvocationCoordinate {
-    counter: u16,
+    counter: u32,
     token: String,
 }
 impl InvocationCoordinate {
-    pub(crate) fn new(counter: u16, token: impl Into<String>) -> Self {
+    pub(crate) fn new(counter: u32, token: impl Into<String>) -> Self {
         Self {
             counter,
             token: token.into(),
@@ -21,13 +22,13 @@ impl InvocationCoordinate {
 }
 impl Display for InvocationCoordinate {
     fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{}:{}", self.counter, self.token)
+        write!(f, "{}:{}", self.token, self.counter)
     }
 }
 
 pub(crate) struct AlignmentStack {
     stack: VecDeque<InvocationCoordinate>,
-    trace: BTreeMap<Path, u16>,
+    trace: BTreeMap<Path, Saturating<u32>>,
 }
 impl AlignmentStack {
     pub(crate) const fn new() -> Self {
@@ -46,8 +47,8 @@ impl AlignmentStack {
         let current_counter = self
             .trace
             .get(&current_path)
-            .map_or(0, |counter| counter + 1);
-        let invocation_coordinate = InvocationCoordinate::new(current_counter, token.into());
+            .map_or(Saturating(0), |counter| counter + Saturating(1));
+        let invocation_coordinate = InvocationCoordinate::new(current_counter.0, token.into());
         self.stack.push_back(invocation_coordinate);
         self.trace.insert(current_path, current_counter);
     }
@@ -63,7 +64,7 @@ mod tests {
     #[test]
     fn invocation_coordinate_display() {
         let invocation_coordinate = super::InvocationCoordinate::new(1, "test");
-        assert_eq!(invocation_coordinate.to_string(), "1:test");
+        assert_eq!(invocation_coordinate.to_string(), "test:1");
     }
 
     #[test]

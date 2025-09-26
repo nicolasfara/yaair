@@ -31,7 +31,7 @@ mod aggregate_json_test {
         let outbound_bytes = vm.get_outbound();
         // Deserialize outbound as OutboundMessage
         let outbound = serializer.deserialize::<OutboundMessage<u32>>(&outbound_bytes).unwrap();
-        let val = outbound.at(&"0:neighboring".into()).unwrap();
+        let val = outbound.at(&"neighboring:0".into()).unwrap();
         let deserialized: Dummy = serializer.deserialize(val).unwrap();
         assert_eq!(deserialized, value.clone());
     }

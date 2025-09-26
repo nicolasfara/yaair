@@ -2,7 +2,6 @@ use crate::rufi::messages::path::Path;
 use alloc::collections::BTreeMap;
 use alloc::string::{String, ToString};
 use alloc::vec::Vec;
-use core::fmt::{Display, Formatter};
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
 
@@ -27,11 +26,7 @@ impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
         self.underlying.get(&path.to_string())
     }
 }
-impl <T: Ord + Hash + Copy + Display> Display for OutboundMessage<T> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-        write!(f, "OutboundMessage[sender={}, data={:?}", self.sender, self.underlying)
-    }
-}
+
 //     pub sender: Id,
 //     underlying: BTreeMap<Path, Box<dyn Any>>,
 // }
