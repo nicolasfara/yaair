@@ -2,8 +2,10 @@
 name = "rufi"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "Nicolas Farabegoli <nicolas.farabegoli@gmail.com>"
+]
 license = "Apache-2.0"
-license-file = "../LICENSE"
 
 [dependencies]
 serde = { version = "1.0.226", default-features = false, features = ["alloc", "derive"] }

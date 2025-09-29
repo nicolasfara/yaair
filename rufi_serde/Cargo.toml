@@ -6,7 +6,6 @@ authors = [
     "Nicolas Farabegoli <nicolas.farabegoli@gmail.com>"
 ]
 license = "Apache-2.0"
-license-file = "../LICENSE"
 
 [dependencies]
 rufi = { path = "../rufi", version = "0.1.0" }
