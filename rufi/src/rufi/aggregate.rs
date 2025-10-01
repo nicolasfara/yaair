@@ -5,9 +5,8 @@ use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::serializer::Serializer;
-use alloc::boxed::Box;
 use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec::Vec;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
@@ -125,23 +124,10 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
         })
     }
 
-    /// Set the inbound message for this computation round.
-    pub fn set_inbound(&mut self, inbound: InboundMessage<Id>) {
+    pub fn prepare_new_round(&mut self, inbound: InboundMessage<Id>) {
+        self.outbound = OutboundMessage::empty(self.local_id);
+        self.alignment_stack = AlignmentStack::new();
         self.inbound = inbound;
-    }
-
-    /// Get a reference to the current state.
-    pub const fn state(&self) -> &State {
-        &self.state
-    }
-
-    /// Get the current alignment path.
-    pub fn current_path(&self) -> Vec<String> {
-        self.alignment_stack
-            .current_path()
-            .iter()
-            .map(ToString::to_string)
-            .collect()
     }
 }
 
@@ -196,8 +182,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
             .get::<V>(&current_path)
             .map_or_else(|| initial.clone(), Clone::clone);
         let updated_state = evolution(previous_state, self);
-        self.state
-            .insert(current_path, Box::new(updated_state.clone()));
+        self.state.insert(current_path, updated_state.clone());
         self.alignment_stack.unalign();
         updated_state
     }
@@ -217,6 +202,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use alloc::boxed::Box;
     use alloc::collections::BTreeMap;
     use alloc::vec;
     use core::any::Any;
@@ -262,5 +248,8 @@ mod tests {
         let initial_value = 10;
         let result = vm.repeat(&initial_value, |prev, _| prev + 1);
         assert_eq!(result, 21); // 20 from state + 1 from evolution
+        vm.prepare_new_round(InboundMessage::default());
+        let next_result = vm.repeat(&initial_value, |prev, _| prev + 1);
+        assert_eq!(next_result, 22); // 21 from previous + 1 from evolution
     }
 }

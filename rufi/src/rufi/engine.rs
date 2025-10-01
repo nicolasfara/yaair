@@ -44,10 +44,10 @@ where
 
     pub fn cycle(&mut self) -> Result<Out, AggregateError> {
         let inbound = self.network.prepare_inbound();
-        self.vm.set_inbound(inbound);
         let result = (self.program)(&self.environment, &mut self.vm);
         let serialized_outbound = self.vm.get_outbound()?;
         self.network.prepare_outbound(serialized_outbound);
+        self.vm.prepare_new_round(inbound);
         Ok(result)
     }
 }
