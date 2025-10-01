@@ -29,9 +29,9 @@ impl State {
                 || {
                     panic!(
                         "Type mismatch in repeat state at path {:?}. \
-                  Expected type {} but found different type in stored state. \\
-                  This usually indicates the same alignment path is being used \
-                  for different value types across iterations.",
+                        Expected type {} but found different type in stored state. \\
+                        This usually indicates the same alignment path is being used \
+                        for different value types across iterations.",
                         path,
                         core::any::type_name::<V>()
                     )

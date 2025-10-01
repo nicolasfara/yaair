@@ -1,4 +1,4 @@
-use crate::rufi::aggregate::VM;
+use crate::rufi::aggregate::{AggregateError, VM};
 use crate::rufi::messages::serializer::Serializer;
 use crate::rufi::network::Network;
 use core::hash::Hash;
@@ -42,13 +42,13 @@ where
         self.local_id
     }
 
-    pub fn cycle(&mut self) -> Out {
+    pub fn cycle(&mut self) -> Result<Out, AggregateError> {
         let inbound = self.network.prepare_inbound();
         self.vm.set_inbound(inbound);
         let result = (self.program)(&self.environment, &mut self.vm);
-        let serialized_outbound = self.vm.get_outbound();
+        let serialized_outbound = self.vm.get_outbound()?;
         self.network.prepare_outbound(serialized_outbound);
-        result
+        Ok(result)
     }
 }
 
@@ -106,6 +106,6 @@ mod tests {
     fn test_cycle() {
         let mut engine = Engine::new(2u32, DummyNetwork, (), DummySerializer, |_env, _vm| 99u8);
         let result = engine.cycle();
-        assert_eq!(result, 99u8);
+        assert_eq!(result, Ok(99u8));
     }
 }
