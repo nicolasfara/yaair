@@ -192,7 +192,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
         Th: FnOnce(&mut Self) -> V,
         El: FnOnce(&mut Self) -> V,
     {
-        self.alignment_stack.align(format!("branch/{condition}"));
+        self.alignment_stack.align(format!("branch[{condition}]"));
         let result = if condition { th(self) } else { el(self) };
         self.alignment_stack.unalign();
         result
@@ -202,26 +202,26 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::rufi::messages::valuetree::ValueTree;
     use alloc::boxed::Box;
     use alloc::collections::BTreeMap;
-    use alloc::vec;
     use core::any::Any;
 
     // Mock serializer for testing
     struct MockSerializer;
 
     impl Serializer for MockSerializer {
-        type Error = &'static str;
+        type Error = serde_json::Error;
 
-        fn serialize<T: Serialize>(&self, _value: &T) -> Result<Vec<u8>, Self::Error> {
-            Ok(vec![1, 2, 3])
+        fn serialize<T: Serialize>(&self, value: &T) -> Result<Vec<u8>, Self::Error> {
+            serde_json::to_vec(value)
         }
 
         fn deserialize<T: for<'de> Deserialize<'de>>(
             &self,
             _value: &[u8],
         ) -> Result<T, Self::Error> {
-            Err("Mock deserialization not implemented")
+            serde_json::from_slice(_value)
         }
     }
 
@@ -251,5 +251,55 @@ mod tests {
         vm.prepare_new_round(InboundMessage::default());
         let next_result = vm.repeat(&initial_value, |prev, _| prev + 1);
         assert_eq!(next_result, 22); // 21 from previous + 1 from evolution
+    }
+
+    #[test]
+    fn neighboring_should_return_a_field_with_only_local_value() {
+        let mut vm = VM::new(1u32, MockSerializer);
+        let value = 100u32;
+        let field = vm.neighboring(&value).unwrap();
+        let expected_field = Field::new(value, BTreeMap::new());
+        assert_eq!(field, expected_field);
+    }
+
+    #[test]
+    fn neighboring_should_create_a_field_with_aligned_devices() {
+        let serializer = MockSerializer;
+        let path = Path::from("neighboring:0");
+        let value_device_1 = serializer.serialize(&1u32).unwrap();
+        let value_device_2 = serializer.serialize(&2u32).unwrap();
+        let device_1 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_1)]));
+        let device_2 = ValueTree::new(BTreeMap::from([(path, value_device_2)]));
+        let inbound_map: BTreeMap<u32, ValueTree> =
+            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let inbound = InboundMessage::new(inbound_map);
+        let mut vm = VM::new(0u32, MockSerializer);
+        vm.prepare_new_round(inbound);
+        let field = vm.neighboring(&1u32).unwrap();
+        let expected_field = Field::new(1u32, BTreeMap::from([(1u32, 1u32), (2u32, 2u32)]));
+        assert_eq!(field, expected_field);
+    }
+
+    #[test]
+    fn branch_should_project_field_on_aligned_devices() {
+        let serializer = MockSerializer;
+        let path_even = Path::from("branch[true]:0/neighboring:0");
+        let path_odd = Path::from("branch[false]:0/neighboring:0");
+        let value_device_1 = serializer.serialize(&1u32).unwrap();
+        let value_device_2 = serializer.serialize(&2u32).unwrap();
+        let device_1 = ValueTree::new(BTreeMap::from([(path_odd.clone(), value_device_1)]));
+        let device_2 = ValueTree::new(BTreeMap::from([(path_even.clone(), value_device_2)]));
+        let inbound_map: BTreeMap<u32, ValueTree> =
+            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let inbound = InboundMessage::new(inbound_map);
+        let mut vm = VM::new(0u32, MockSerializer);
+        vm.prepare_new_round(inbound);
+        let field = vm.branch(
+            vm.local_id % 2 == 0,
+            |vm| vm.neighboring(&u32::MAX).unwrap(),
+            |vm| vm.neighboring(&u32::MIN).unwrap(),
+        );
+        let expected_field = Field::new(u32::MAX, BTreeMap::from([(2u32, 2u32)]));
+        assert_eq!(field, expected_field);
     }
 }
