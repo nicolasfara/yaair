@@ -1,7 +1,7 @@
 use alloc::collections::BTreeMap;
 use core::hash::Hash;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Field<D: Ord + Hash + Copy, V> {
     default: V,
     overrides: BTreeMap<D, V>,
