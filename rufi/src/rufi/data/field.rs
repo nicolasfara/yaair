@@ -16,6 +16,10 @@ impl<D: Ord + Hash + Copy, V> Field<D, V> {
         &self.default
     }
 
+    pub fn size(&self) -> usize {
+        1 + self.overrides.len()
+    }
+
     pub fn aligned_map<O, V2, F>(&self, other: &Field<D, V2>, transform: F) -> Field<D, O>
     where
         O: Clone,

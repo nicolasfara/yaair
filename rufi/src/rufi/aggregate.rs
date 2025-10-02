@@ -5,6 +5,7 @@ use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::serializer::Serializer;
+use alloc::collections::BTreeMap;
 use alloc::format;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -73,6 +74,11 @@ pub trait Aggregate<Id: Ord + Hash + Copy + Serialize> {
     where
         Th: FnOnce(&mut Self) -> V,
         El: FnOnce(&mut Self) -> V;
+
+    fn share<V, E>(&mut self, initial: &V, evolution: E) -> Result<V, AggregateError>
+    where
+        V: Serialize + for<'de> Deserialize<'de> + Clone + 'static,
+        E: FnOnce(&mut Self, Field<Id, V>) -> V;
 }
 
 /// Virtual Machine implementation for aggregate computing.
@@ -129,6 +135,26 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
         self.alignment_stack = AlignmentStack::new();
         self.inbound = inbound;
     }
+
+    fn get_at_path<V>(&self, path: &Path) -> Result<BTreeMap<Id, V>, AggregateError>
+    where
+        V: for<'de> Deserialize<'de>,
+    {
+        let mut result = BTreeMap::new();
+        for (id, elem) in self.inbound.get_at_path(path) {
+            match self.serializer.deserialize::<V>(&elem) {
+                Ok(deserialized_value) => {
+                    result.insert(id, deserialized_value);
+                }
+                Err(err) => {
+                    return Err(AggregateError::DeserializationError(format!(
+                        "Failed to deserialize value at path {path}: {err}",
+                    )));
+                }
+            }
+        }
+        Ok(result)
+    }
 }
 
 impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, S> {
@@ -140,20 +166,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
         let path = Path::new(self.alignment_stack.current_path());
 
         // Collect neighboring values with improved error handling
-        let mut neighboring_values = alloc::collections::BTreeMap::new();
-        for (id, elem) in self.inbound.get_at_path(&path) {
-            match self.serializer.deserialize::<V>(&elem) {
-                Ok(deserialized_value) => {
-                    neighboring_values.insert(id, deserialized_value);
-                }
-                Err(err) => {
-                    self.alignment_stack.unalign();
-                    return Err(AggregateError::DeserializationError(format!(
-                        "Failed to deserialize neighboring value at path {path}: {err}",
-                    )));
-                }
-            }
-        }
+        let neighboring_values = self.get_at_path(&path)?;
 
         let result = Field::new(value.clone(), neighboring_values);
 
@@ -196,6 +209,31 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
         let result = if condition { th(self) } else { el(self) };
         self.alignment_stack.unalign();
         result
+    }
+
+    fn share<V, E>(&mut self, initial: &V, evolution: E) -> Result<V, AggregateError>
+    where
+        V: Serialize + for<'de> Deserialize<'de> + Clone + 'static,
+        E: FnOnce(&mut Self, Field<Id, V>) -> V,
+    {
+        self.alignment_stack.align("share");
+        let current_path = Path::new(self.alignment_stack.current_path());
+        let previous_state = self
+            .state
+            .get::<V>(&current_path)
+            .map_or_else(|| initial.clone(), Clone::clone);
+        let neighboring_values = self.get_at_path(&current_path)?;
+        let field = Field::new(previous_state.clone(), neighboring_values);
+        let updated_state = evolution(self, field);
+        self.state
+            .insert(current_path.clone(), updated_state.clone());
+        let serialized_value = self.serializer.serialize(&updated_state).map_err(|err| {
+            self.alignment_stack.unalign();
+            AggregateError::SerializationError(format!("Failed to serialize share value: {err}"))
+        })?;
+        self.outbound.append(&current_path, serialized_value);
+        self.alignment_stack.unalign();
+        Ok(updated_state)
     }
 }
 
@@ -301,5 +339,52 @@ mod tests {
         );
         let expected_field = Field::new(u32::MAX, BTreeMap::from([(2u32, 2u32)]));
         assert_eq!(field, expected_field);
+    }
+
+    #[test]
+    fn share_should_use_initial_value_when_no_previous_state() {
+        let serializer = MockSerializer;
+        let mut vm = VM::new(1u32, MockSerializer);
+        let initial_value = 42;
+        let result = vm
+            .share(&initial_value, |_, field| field.local() * 2)
+            .unwrap();
+        assert_eq!(result, initial_value * 2);
+        let to_send = serializer
+            .deserialize::<OutboundMessage<u32>>(vm.get_outbound().unwrap().as_slice())
+            .unwrap();
+        let sent_value = to_send.at(&Path::from("share:0")).unwrap();
+        let deserialized_sent_value = serializer.deserialize::<i32>(sent_value).unwrap();
+        assert_eq!(deserialized_sent_value, initial_value * 2);
+    }
+
+    #[test]
+    fn share_should_use_last_state_and_neighbors() {
+        let serializer = MockSerializer;
+        let path = Path::from("share:0");
+        let value_device_1 = serializer.serialize(&10i32).unwrap();
+        let value_device_2 = serializer.serialize(&20i32).unwrap();
+        let device_1 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_1)]));
+        let device_2 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_2)]));
+        let inbound_map: BTreeMap<u32, ValueTree> =
+            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let inbound = InboundMessage::new(inbound_map);
+        let mut vm = VM::new(0u32, MockSerializer);
+        vm.prepare_new_round(inbound);
+        let initial_value = 1i32;
+        let result = vm
+            .share(&initial_value, |_, field| {
+                field.local() + field.size() as i32
+            })
+            .unwrap();
+        assert_eq!(result, 4);
+        // Reset neighbors, but the state should persist
+        vm.prepare_new_round(InboundMessage::default());
+        let next_result = vm
+            .share(&initial_value, |_, field| {
+                field.local() + field.size() as i32 // local is 4, size is 1 (local only)
+            })
+            .unwrap();
+        assert_eq!(next_result, 5);
     }
 }
