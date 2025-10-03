@@ -1,5 +1,6 @@
 use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::serializer::Serializer;
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};

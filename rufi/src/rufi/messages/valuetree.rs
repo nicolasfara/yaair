@@ -1,20 +1,26 @@
 use crate::rufi::messages::path::Path;
-use alloc::collections::BTreeMap;
+
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
+use std::collections::HashMap as Map;
 
 #[derive(Debug)]
 pub struct ValueTree {
-    underlying: BTreeMap<Path, Vec<u8>>,
+    underlying: Map<Path, Vec<u8>>,
 }
 
 impl ValueTree {
-    pub const fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
-            underlying: BTreeMap::new(),
+            underlying: Map::new(),
         }
     }
 
-    pub const fn new(underlying: BTreeMap<Path, Vec<u8>>) -> Self {
+    pub const fn new(underlying: Map<Path, Vec<u8>>) -> Self {
         Self { underlying }
     }
 

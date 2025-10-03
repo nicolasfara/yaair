@@ -12,3 +12,7 @@ serde = { version = "1.0.226", default-features = false, features = ["alloc", "d
 
 [dev-dependencies]
 serde_json = { version = "1.0.145" }
+
+[features]
+default = [ "std" ]
+std = [ ]

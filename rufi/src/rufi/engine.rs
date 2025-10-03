@@ -56,6 +56,7 @@ where
 mod tests {
     use super::*;
     use crate::rufi::messages::inbound::InboundMessage;
+    #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
     use core::fmt::{self, Display};
 
