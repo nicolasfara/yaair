@@ -1,5 +1,5 @@
-use yaair::rufi::messages::serializer::Serializer;
 use serde::{Deserialize, Serialize};
+use yaair::rufi::messages::serializer::Serializer;
 
 #[cfg(feature = "json")]
 pub struct JsonSerializer;
