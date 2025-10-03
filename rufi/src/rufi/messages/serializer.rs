@@ -1,4 +1,6 @@
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
 use core::fmt::Display;
 use serde::{Deserialize, Serialize};
 

@@ -1,20 +1,26 @@
 use crate::rufi::messages::path::Path;
+#[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
-use alloc::collections::BTreeMap;
+
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+
+use std::collections::HashMap as Map;
+
 use core::any::Any;
 
 #[derive(Debug)]
 pub struct State {
-    last_state: BTreeMap<Path, Box<dyn Any>>,
+    last_state: Map<Path, Box<dyn Any>>,
 }
 impl State {
     pub fn new() -> Self {
         Self {
-            last_state: BTreeMap::new(),
+            last_state: Map::new(),
         }
     }
 
-    pub fn from_snapshot(snapshot: BTreeMap<Path, Box<dyn Any>>) -> Self {
+    pub fn from_snapshot(snapshot: Map<Path, Box<dyn Any>>) -> Self {
         Self {
             last_state: snapshot,
         }
@@ -49,8 +55,12 @@ impl Default for State {
 mod tests {
     use super::*;
     use crate::rufi::messages::path::Path;
+    #[cfg(not(feature = "std"))]
     use alloc::string::ToString;
+
+    #[cfg(not(feature = "std"))]
     use alloc::vec;
+
     use core::any::Any;
     use core::f32::consts::PI;
 
@@ -95,7 +105,7 @@ mod tests {
     #[test]
     fn test_from_snapshot() {
         let path = make_path(4);
-        let mut snapshot: BTreeMap<Path, Box<dyn Any>> = BTreeMap::new();
+        let mut snapshot: Map<Path, Box<dyn Any>> = Map::new();
         snapshot.insert(path.clone(), Box::new(99u8));
         let state = State::from_snapshot(snapshot);
         assert_eq!(state.get::<u8>(&path), Some(&99u8));

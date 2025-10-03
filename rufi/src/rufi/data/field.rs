@@ -1,15 +1,17 @@
-use alloc::collections::BTreeMap;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
 use core::hash::Hash;
+use std::collections::HashMap as Map;
 use core::num::Saturating;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Field<D: Ord + Hash + Copy, V> {
     default: V,
-    overrides: BTreeMap<D, V>,
+    overrides: Map<D, V>,
 }
 
 impl<D: Ord + Hash + Copy, V> Field<D, V> {
-    pub const fn new(default: V, overrides: BTreeMap<D, V>) -> Self {
+    pub fn new(default: V, overrides: Map<D, V>) -> Self {
         Self { default, overrides }
     }
 
@@ -54,8 +56,13 @@ impl<D: Ord + Hash + Copy, V> Field<D, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(not(feature = "std"))]
     use alloc::string::ToString;
+
+    #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
+
+    #[cfg(not(feature = "std"))]
     use alloc::{format, vec};
 
     fn make_field<D: Ord + Hash + Copy, V: Clone>(

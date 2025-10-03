@@ -5,12 +5,21 @@ use crate::rufi::messages::inbound::InboundMessage;
 use crate::rufi::messages::outbound::OutboundMessage;
 use crate::rufi::messages::path::Path;
 use crate::rufi::messages::serializer::Serializer;
-use alloc::collections::BTreeMap;
+
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+
+#[cfg(not(feature = "std"))]
 use alloc::format;
+
+#[cfg(not(feature = "std"))]
 use alloc::string::String;
+
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap as Map;
 
 /// Represents errors that can occur during aggregate computation
 #[derive(Debug, Eq, PartialEq)]
@@ -136,11 +145,11 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
         self.inbound = inbound;
     }
 
-    fn get_at_path<V>(&self, path: &Path) -> Result<BTreeMap<Id, V>, AggregateError>
+    fn get_at_path<V>(&self, path: &Path) -> Result<Map<Id, V>, AggregateError>
     where
         V: for<'de> Deserialize<'de>,
     {
-        let mut result = BTreeMap::new();
+        let mut result = Map::new();
         for (id, elem) in self.inbound.get_at_path(path) {
             match self.serializer.deserialize::<V>(&elem) {
                 Ok(deserialized_value) => {
@@ -241,8 +250,11 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
 mod tests {
     use super::*;
     use crate::rufi::messages::valuetree::ValueTree;
+    #[cfg(not(feature = "std"))]
     use alloc::boxed::Box;
-    use alloc::collections::BTreeMap;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::collections::BTreeMap as Map;
     use core::any::Any;
 
     // Mock serializer for testing
@@ -279,7 +291,7 @@ mod tests {
 
     #[test]
     fn repeat_should_use_last_available_state() {
-        let mut state_map: BTreeMap<Path, Box<dyn Any>> = BTreeMap::new();
+        let mut state_map: Map<Path, Box<dyn Any>> = Map::new();
         state_map.insert(Path::from("repeat:0"), Box::new(20));
         let state = State::from_snapshot(state_map);
         let mut vm = VM::new_with_state(1, MockSerializer, state);
@@ -296,7 +308,7 @@ mod tests {
         let mut vm = VM::new(1u32, MockSerializer);
         let value = 100u32;
         let field = vm.neighboring(&value).unwrap();
-        let expected_field = Field::new(value, BTreeMap::new());
+        let expected_field = Field::new(value, Map::new());
         assert_eq!(field, expected_field);
     }
 
@@ -306,15 +318,14 @@ mod tests {
         let path = Path::from("neighboring:0");
         let value_device_1 = serializer.serialize(&1u32).unwrap();
         let value_device_2 = serializer.serialize(&2u32).unwrap();
-        let device_1 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_1)]));
-        let device_2 = ValueTree::new(BTreeMap::from([(path, value_device_2)]));
-        let inbound_map: BTreeMap<u32, ValueTree> =
-            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let device_1 = ValueTree::new(Map::from([(path.clone(), value_device_1)]));
+        let device_2 = ValueTree::new(Map::from([(path, value_device_2)]));
+        let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
         let mut vm = VM::new(0u32, MockSerializer);
         vm.prepare_new_round(inbound);
         let field = vm.neighboring(&1u32).unwrap();
-        let expected_field = Field::new(1u32, BTreeMap::from([(1u32, 1u32), (2u32, 2u32)]));
+        let expected_field = Field::new(1u32, Map::from([(1u32, 1u32), (2u32, 2u32)]));
         assert_eq!(field, expected_field);
     }
 
@@ -325,10 +336,9 @@ mod tests {
         let path_odd = Path::from("branch[false]:0/neighboring:0");
         let value_device_1 = serializer.serialize(&1u32).unwrap();
         let value_device_2 = serializer.serialize(&2u32).unwrap();
-        let device_1 = ValueTree::new(BTreeMap::from([(path_odd, value_device_1)]));
-        let device_2 = ValueTree::new(BTreeMap::from([(path_even, value_device_2)]));
-        let inbound_map: BTreeMap<u32, ValueTree> =
-            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let device_1 = ValueTree::new(Map::from([(path_odd, value_device_1)]));
+        let device_2 = ValueTree::new(Map::from([(path_even, value_device_2)]));
+        let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
         let mut vm = VM::new(0u32, MockSerializer);
         vm.prepare_new_round(inbound);
@@ -337,7 +347,7 @@ mod tests {
             |vm| vm.neighboring(&u32::MAX).unwrap(),
             |vm| vm.neighboring(&u32::MIN).unwrap(),
         );
-        let expected_field = Field::new(u32::MAX, BTreeMap::from([(2u32, 2u32)]));
+        let expected_field = Field::new(u32::MAX, Map::from([(2u32, 2u32)]));
         assert_eq!(field, expected_field);
     }
 
@@ -371,10 +381,9 @@ mod tests {
         let path = Path::from("share:0");
         let value_device_1 = serializer.serialize(&10i32).unwrap();
         let value_device_2 = serializer.serialize(&20i32).unwrap();
-        let device_1 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_1)]));
-        let device_2 = ValueTree::new(BTreeMap::from([(path, value_device_2)]));
-        let inbound_map: BTreeMap<u32, ValueTree> =
-            BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
+        let device_1 = ValueTree::new(Map::from([(path.clone(), value_device_1)]));
+        let device_2 = ValueTree::new(Map::from([(path, value_device_2)]));
+        let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
         let mut vm = VM::new(0u32, MockSerializer);
         vm.prepare_new_round(inbound);

@@ -1,11 +1,21 @@
 use crate::rufi::messages::path::Path;
-use alloc::collections::BTreeMap;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+
+#[cfg(not(feature = "std"))]
 use alloc::collections::VecDeque;
+
+#[cfg(not(feature = "std"))]
 use alloc::string::String;
+
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
 use core::fmt::Display;
 use core::fmt::Formatter;
 use core::num::Saturating;
+use std::collections::HashMap as Map;
+use std::collections::VecDeque;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct InvocationCoordinate {
@@ -28,13 +38,13 @@ impl Display for InvocationCoordinate {
 
 pub(crate) struct AlignmentStack {
     stack: VecDeque<InvocationCoordinate>,
-    trace: BTreeMap<Path, Saturating<u32>>,
+    trace: Map<Path, Saturating<u32>>,
 }
 impl AlignmentStack {
-    pub(crate) const fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             stack: VecDeque::new(),
-            trace: BTreeMap::new(),
+            trace: Map::new(),
         }
     }
 
@@ -61,6 +71,8 @@ impl AlignmentStack {
 #[cfg(test)]
 mod tests {
     use crate::rufi::alignment::alignment_stack::InvocationCoordinate;
+
+    #[cfg(not(feature = "std"))]
     use alloc::string::ToString;
 
     #[test]

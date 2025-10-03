@@ -1,5 +1,9 @@
+#[cfg(not(feature = "std"))]
 use alloc::string::{String, ToString};
+
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
 use core::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
 
@@ -31,7 +35,10 @@ impl From<&str> for Path {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloc::collections::BTreeSet;
+
+    #[cfg(not(feature = "std"))]
+    use alloc::collections::BTreeSet as Set;
+    use std::collections::HashSet as Set;
 
     fn make_path(tokens: &[&str]) -> Path {
         Path::new(tokens.to_vec())
@@ -45,7 +52,7 @@ mod tests {
         assert_eq!(p1, p2);
         assert_ne!(p1, p3);
 
-        let mut set = BTreeSet::new();
+        let mut set = Set::new();
         set.insert(p1);
         assert!(set.contains(&p2));
         assert!(!set.contains(&p3));

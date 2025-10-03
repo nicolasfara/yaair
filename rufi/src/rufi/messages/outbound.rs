@@ -1,20 +1,27 @@
 use crate::rufi::messages::path::Path;
-use alloc::collections::BTreeMap;
+#[cfg(not(feature = "std"))]
+use alloc::collections::BTreeMap as Map;
+
+#[cfg(not(feature = "std"))]
 use alloc::string::{String, ToString};
+
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap as Map;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct OutboundMessage<Id: Ord + Hash + Copy> {
     pub sender: Id,
-    underlying: BTreeMap<String, Vec<u8>>,
+    underlying: Map<String, Vec<u8>>,
 }
 impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
-    pub const fn empty(sender: Id) -> Self {
+    pub fn empty(sender: Id) -> Self {
         Self {
             sender,
-            underlying: BTreeMap::new(),
+            underlying: Map::new(),
         }
     }
 
