@@ -1,5 +1,5 @@
 [package]
-name = "rufi_serde"
+name = "yaair_serde"
 version = "0.1.0"
 edition = "2021"
 authors = [
@@ -12,7 +12,7 @@ name = "gradient"
 path = "../examples/gradient.rs"
 
 [dependencies]
-rufi = { path = "../rufi", version = "0.1.0" }
+yaair = { path = "../yaair", version = "0.1.0" }
 serde = { version = "1.0.227" }
 serde_json = { version = "1.0.145" }
 

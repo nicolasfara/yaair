@@ -1,5 +1,5 @@
 [package]
-name = "rufi"
+name = "yaair"
 version = "0.1.0"
 edition = "2021"
 authors = [
@@ -8,11 +8,11 @@ authors = [
 license = "Apache-2.0"
 
 [dependencies]
-serde = { version = "1.0.226", default-features = false, features = ["alloc", "derive"] }
+serde = { version = "1.0.226", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
 serde_json = { version = "1.0.145" }
 
 [features]
 default = [ "std" ]
-std = [ ]
+std = [ "serde/std" ]

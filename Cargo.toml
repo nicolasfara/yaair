@@ -1,11 +1,11 @@
 [workspace]
 members = [
-    "rufi",
-    "rufi_serde",
+    "yaair",
+    "yaair_serde",
 ]
 resolver = "2"
 
 #[patch.crates-io]
-#rufi = { path = "rufi" }
+#yaair = { path = "yaair" }
 
 [workspace.dependencies]

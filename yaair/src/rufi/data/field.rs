@@ -11,7 +11,7 @@ pub struct Field<D: Ord + Hash + Copy, V> {
 }
 
 impl<D: Ord + Hash + Copy, V> Field<D, V> {
-    pub fn new(default: V, overrides: Map<D, V>) -> Self {
+    pub const fn new(default: V, overrides: Map<D, V>) -> Self {
         Self { default, overrides }
     }
 

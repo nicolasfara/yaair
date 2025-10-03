@@ -1,4 +1,4 @@
-use rufi::rufi::messages::serializer::Serializer;
+use yaair::rufi::messages::serializer::Serializer;
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "json")]
