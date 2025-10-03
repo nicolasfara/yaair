@@ -5,7 +5,7 @@ use rufi::rufi::messages::inbound::InboundMessage;
 use rufi::rufi::network::Network;
 use rufi_serde::rufi_serde::json::JsonSerializer;
 use std::cmp::Ordering;
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -14,7 +14,7 @@ struct GradientEnv {
 }
 impl GradientEnv {
     fn distances(&self) -> Field<u32, f32> {
-        Field::new(0.0, BTreeMap::from([(1, 1.0), (2, 2.0), (3, 1.5)]))
+        Field::new(0.0, HashMap::from([(1, 1.0), (2, 2.0), (3, 1.5)]))
     }
 }
 
