@@ -1,13 +1,13 @@
-use std::cmp::Ordering;
-use std::collections::BTreeMap;
-use std::thread::sleep;
-use std::time::Duration;
 use rufi::rufi::aggregate::{Aggregate, AggregateError, VM};
 use rufi::rufi::data::field::Field;
 use rufi::rufi::engine::Engine;
 use rufi::rufi::messages::inbound::InboundMessage;
 use rufi::rufi::network::Network;
 use rufi_serde::rufi_serde::json::JsonSerializer;
+use std::cmp::Ordering;
+use std::collections::BTreeMap;
+use std::thread::sleep;
+use std::time::Duration;
 
 struct GradientEnv {
     pub is_source: bool,
@@ -20,7 +20,7 @@ impl GradientEnv {
 
 struct DummyNetwork;
 impl Network<u32, JsonSerializer> for DummyNetwork {
-    fn prepare_outbound(&mut self, _outbound_message: Vec<u8>) { }
+    fn prepare_outbound(&mut self, _outbound_message: Vec<u8>) {}
 
     fn prepare_inbound(&mut self) -> InboundMessage<u32> {
         InboundMessage::default()
@@ -44,7 +44,12 @@ fn gradient(env: &GradientEnv, vm: &mut VM<u32, JsonSerializer>) -> Result<f32, 
     let initial = f32::MAX;
     vm.share(&initial, |_, field| {
         let distances = field.aligned_map(&env.distances(), |a, b| a + b);
-        let min_distance = *distances.min_by(|a, b| PartialOrd::partial_cmp(&a, &b).unwrap_or(Ordering::Greater));
-        if env.is_source { 0.0 } else { min_distance }
+        let min_distance =
+            *distances.min_by(|a, b| PartialOrd::partial_cmp(&a, &b).unwrap_or(Ordering::Greater));
+        if env.is_source {
+            0.0
+        } else {
+            min_distance
+        }
     })
 }
