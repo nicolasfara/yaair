@@ -1,8 +1,8 @@
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
 use core::hash::Hash;
-use std::collections::HashMap as Map;
 use core::num::Saturating;
+use std::collections::HashMap as Map;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Field<D: Ord + Hash + Copy, V> {
