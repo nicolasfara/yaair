@@ -17,7 +17,7 @@ rustflags = [
     "-D", "clippy::unreachable",
     "-D", "clippy::indexing_slicing",
     "-D", "clippy::arithmetic_side_effects", # Consider allowing for specific use cases
-    "-D", "clippy::float_arithmetic",   # Consider allowing for specific use cases
+#    "-D", "clippy::float_arithmetic",   # Consider allowing for specific use cases
     "-D", "clippy::as_conversions",
     "-D", "clippy::clone_on_ref_ptr",
     "-D", "clippy::create_dir",
@@ -45,7 +45,7 @@ rustflags = [
     "-W", "clippy::many_single_char_names",
     "-W", "clippy::similar_names",
     "-W", "clippy::shadow_unrelated",
-    "-W", "clippy::shadow_reuse",
+#    "-W", "clippy::shadow_reuse",
     "-W", "clippy::shadow_same",
     "-W", "clippy::string_add",
     "-W", "clippy::string_add_assign",

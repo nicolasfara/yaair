@@ -223,7 +223,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
             .get::<V>(&current_path)
             .map_or_else(|| initial.clone(), Clone::clone);
         let neighboring_values = self.get_at_path(&current_path)?;
-        let field = Field::new(previous_state.clone(), neighboring_values);
+        let field = Field::new(previous_state, neighboring_values);
         let updated_state = evolution(self, field);
         self.state
             .insert(current_path.clone(), updated_state.clone());
@@ -257,9 +257,9 @@ mod tests {
 
         fn deserialize<T: for<'de> Deserialize<'de>>(
             &self,
-            _value: &[u8],
+            value: &[u8],
         ) -> Result<T, Self::Error> {
-            serde_json::from_slice(_value)
+            serde_json::from_slice(value)
         }
     }
 
@@ -325,15 +325,15 @@ mod tests {
         let path_odd = Path::from("branch[false]:0/neighboring:0");
         let value_device_1 = serializer.serialize(&1u32).unwrap();
         let value_device_2 = serializer.serialize(&2u32).unwrap();
-        let device_1 = ValueTree::new(BTreeMap::from([(path_odd.clone(), value_device_1)]));
-        let device_2 = ValueTree::new(BTreeMap::from([(path_even.clone(), value_device_2)]));
+        let device_1 = ValueTree::new(BTreeMap::from([(path_odd, value_device_1)]));
+        let device_2 = ValueTree::new(BTreeMap::from([(path_even, value_device_2)]));
         let inbound_map: BTreeMap<u32, ValueTree> =
             BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
         let mut vm = VM::new(0u32, MockSerializer);
         vm.prepare_new_round(inbound);
         let field = vm.branch(
-            vm.local_id % 2 == 0,
+            vm.local_id.is_multiple_of(2),
             |vm| vm.neighboring(&u32::MAX).unwrap(),
             |vm| vm.neighboring(&u32::MIN).unwrap(),
         );
@@ -360,31 +360,29 @@ mod tests {
 
     #[test]
     fn share_should_use_last_state_and_neighbors() {
+        fn program(vm: &mut VM<u32, MockSerializer>) -> Result<i32, AggregateError> {
+            let initial_value = 1i32;
+            vm.share(&initial_value, |_, field| {
+                let size: i32 = field.size().try_into().unwrap();
+                field.local() + size
+            })
+        }
         let serializer = MockSerializer;
         let path = Path::from("share:0");
         let value_device_1 = serializer.serialize(&10i32).unwrap();
         let value_device_2 = serializer.serialize(&20i32).unwrap();
         let device_1 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_1)]));
-        let device_2 = ValueTree::new(BTreeMap::from([(path.clone(), value_device_2)]));
+        let device_2 = ValueTree::new(BTreeMap::from([(path, value_device_2)]));
         let inbound_map: BTreeMap<u32, ValueTree> =
             BTreeMap::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
         let mut vm = VM::new(0u32, MockSerializer);
         vm.prepare_new_round(inbound);
-        let initial_value = 1i32;
-        let result = vm
-            .share(&initial_value, |_, field| {
-                field.local() + field.size() as i32
-            })
-            .unwrap();
+        let result = program(&mut vm).unwrap();
         assert_eq!(result, 4);
         // Reset neighbors, but the state should persist
         vm.prepare_new_round(InboundMessage::default());
-        let next_result = vm
-            .share(&initial_value, |_, field| {
-                field.local() + field.size() as i32 // local is 4, size is 1 (local only)
-            })
-            .unwrap();
+        let next_result = program(&mut vm).unwrap();
         assert_eq!(next_result, 5);
     }
 }

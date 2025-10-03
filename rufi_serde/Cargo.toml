@@ -7,6 +7,10 @@ authors = [
 ]
 license = "Apache-2.0"
 
+[[example]]
+name = "gradient"
+path = "../examples/gradient.rs"
+
 [dependencies]
 rufi = { path = "../rufi", version = "0.1.0" }
 serde = { version = "1.0.227" }

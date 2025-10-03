@@ -1,5 +1,6 @@
 use alloc::collections::BTreeMap;
 use core::hash::Hash;
+use core::num::Saturating;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Field<D: Ord + Hash + Copy, V> {
@@ -8,7 +9,7 @@ pub struct Field<D: Ord + Hash + Copy, V> {
 }
 
 impl<D: Ord + Hash + Copy, V> Field<D, V> {
-    pub(crate) const fn new(default: V, overrides: BTreeMap<D, V>) -> Self {
+    pub const fn new(default: V, overrides: BTreeMap<D, V>) -> Self {
         Self { default, overrides }
     }
 
@@ -17,7 +18,7 @@ impl<D: Ord + Hash + Copy, V> Field<D, V> {
     }
 
     pub fn size(&self) -> usize {
-        1 + self.overrides.len()
+        (Saturating(self.overrides.len()) + Saturating(1)).0
     }
 
     pub fn aligned_map<O, V2, F>(&self, other: &Field<D, V2>, transform: F) -> Field<D, O>
@@ -33,6 +34,20 @@ impl<D: Ord + Hash + Copy, V> Field<D, V> {
                 .filter_map(|(k, v)| other.overrides.get(k).map(|v2| (*k, transform(v, v2))))
                 .collect(),
         )
+    }
+
+    pub fn min(&self) -> &V
+    where
+        V: Ord + Clone,
+    {
+        self.overrides.values().min().unwrap_or(&self.default)
+    }
+
+    pub fn min_by(&self, mut compare: impl FnMut(&V, &V) -> core::cmp::Ordering) -> &V {
+        self.overrides
+            .values()
+            .min_by(|a, b| compare(a, b))
+            .unwrap_or(&self.default)
     }
 }
 
