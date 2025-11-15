@@ -127,6 +127,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ check, test, deny ]
     permissions:
+      pull-requests: write
       contents: write
     steps:
       - *checkout
