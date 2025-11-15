@@ -129,8 +129,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ check, test, deny ]
     permissions:
-      pull-requests: write
       contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - *checkout
       - *cache

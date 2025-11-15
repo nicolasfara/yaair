@@ -43,6 +43,7 @@ jobs:
     needs: [ dispatcher ]
     uses: ./.github/workflows/build-and-release.yml
     permissions:
+      pull-requests: write
       contents: write
       packages: write
       security-events: write
