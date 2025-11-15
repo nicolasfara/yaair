@@ -114,7 +114,7 @@ jobs:
 #        uses: dtolnay/rust-toolchain@stable
       - *cache
       - name: Run release-plz
-        uses: release-plz/action@v0.5
+        uses: release-plz/action@d529f731ae3e89610ada96eda34e5c6ba3b12214 # v0.5.118
         with:
           command: release
         env:
@@ -135,7 +135,7 @@ jobs:
       #        name: Install Rust toolchain
       #        uses: dtolnay/rust-toolchain@stable
       - name: Run release-plz
-        uses: release-plz/action@v0.5
+        uses: release-plz/action@d529f731ae3e89610ada96eda34e5c6ba3b12214 # v0.5.118
         with:
           command: release-pr
         env:

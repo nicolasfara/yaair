@@ -6,6 +6,7 @@ authors = [
     "Nicolas Farabegoli <nicolas.farabegoli@gmail.com>"
 ]
 license = "Apache-2.0"
+description = "Yet Another Aggregate (computing) Implementation in Rust. A blazing fast and memory-efficient implementation of Aggregate Computing."
 
 [dependencies]
 serde = { version = "1.0.226", default-features = false, features = ["derive"] }
