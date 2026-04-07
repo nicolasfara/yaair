@@ -3,4 +3,4 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 
-pub mod rufi;
+pub mod yaair;

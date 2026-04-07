@@ -2,11 +2,11 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::thread::sleep;
 use std::time::Duration;
-use yaair::rufi::aggregate::{Aggregate, AggregateError, VM};
-use yaair::rufi::data::field::Field;
-use yaair::rufi::engine::Engine;
-use yaair::rufi::messages::inbound::InboundMessage;
-use yaair::rufi::network::Network;
+use yaair::yaair::aggregate::{Aggregate, AggregateError, VM};
+use yaair::yaair::data::field::Field;
+use yaair::yaair::engine::Engine;
+use yaair::yaair::messages::inbound::InboundMessage;
+use yaair::yaair::network::Network;
 use yaair_serde::rufi_serde::json::JsonSerializer;
 
 struct GradientEnv {

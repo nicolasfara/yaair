@@ -1,4 +1,4 @@
-use crate::rufi::messages::path::Path;
+use crate::yaair::messages::path::Path;
 #[cfg(not(feature = "std"))]
 use alloc::boxed::Box;
 
@@ -54,7 +54,7 @@ impl Default for State {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rufi::messages::path::Path;
+    use crate::yaair::messages::path::Path;
     #[cfg(not(feature = "std"))]
     use alloc::string::ToString;
 

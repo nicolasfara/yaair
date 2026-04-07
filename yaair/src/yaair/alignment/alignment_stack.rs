@@ -1,4 +1,4 @@
-use crate::rufi::messages::path::Path;
+use crate::yaair::messages::path::Path;
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
 
@@ -70,7 +70,7 @@ impl AlignmentStack {
 
 #[cfg(test)]
 mod tests {
-    use crate::rufi::alignment::alignment_stack::InvocationCoordinate;
+    use crate::yaair::alignment::alignment_stack::InvocationCoordinate;
 
     #[cfg(not(feature = "std"))]
     use alloc::string::ToString;

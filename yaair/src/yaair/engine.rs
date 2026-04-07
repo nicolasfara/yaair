@@ -1,6 +1,6 @@
-use crate::rufi::aggregate::{AggregateError, VM};
-use crate::rufi::messages::serializer::Serializer;
-use crate::rufi::network::Network;
+use crate::yaair::aggregate::{AggregateError, VM};
+use crate::yaair::messages::serializer::Serializer;
+use crate::yaair::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
@@ -55,7 +55,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rufi::messages::inbound::InboundMessage;
+    use crate::yaair::messages::inbound::InboundMessage;
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
     use core::fmt::{self, Display};

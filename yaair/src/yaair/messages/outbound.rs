@@ -1,4 +1,4 @@
-use crate::rufi::messages::path::Path;
+use crate::yaair::messages::path::Path;
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
 

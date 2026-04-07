@@ -1,10 +1,10 @@
-use crate::rufi::alignment::alignment_stack::AlignmentStack;
-use crate::rufi::data::field::Field;
-use crate::rufi::data::state::State;
-use crate::rufi::messages::inbound::InboundMessage;
-use crate::rufi::messages::outbound::OutboundMessage;
-use crate::rufi::messages::path::Path;
-use crate::rufi::messages::serializer::Serializer;
+use crate::yaair::alignment::alignment_stack::AlignmentStack;
+use crate::yaair::data::field::Field;
+use crate::yaair::data::state::State;
+use crate::yaair::messages::inbound::InboundMessage;
+use crate::yaair::messages::outbound::OutboundMessage;
+use crate::yaair::messages::path::Path;
+use crate::yaair::messages::serializer::Serializer;
 
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
@@ -249,7 +249,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rufi::messages::valuetree::ValueTree;
+    use crate::yaair::messages::valuetree::ValueTree;
     #[cfg(not(feature = "std"))]
     use alloc::boxed::Box;
 

@@ -1,5 +1,5 @@
-use crate::rufi::messages::path::Path;
-use crate::rufi::messages::valuetree::ValueTree;
+use crate::yaair::messages::path::Path;
+use crate::yaair::messages::valuetree::ValueTree;
 #[cfg(not(feature = "std"))]
 use alloc::collections::{BTreeMap as Map, BTreeSet as Set};
 
