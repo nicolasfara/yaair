@@ -7,7 +7,7 @@ use yaair::yaair::data::field::Field;
 use yaair::yaair::engine::Engine;
 use yaair::yaair::messages::inbound::InboundMessage;
 use yaair::yaair::network::Network;
-use yaair_serde::rufi_serde::json::JsonSerializer;
+use yaair_serde::yaair_serde::json::JsonSerializer;
 
 struct GradientEnv {
     pub is_source: bool,
