@@ -1,5 +1,5 @@
-use crate::rufi::messages::inbound::InboundMessage;
-use crate::rufi::messages::serializer::Serializer;
+use crate::yaair::messages::inbound::InboundMessage;
+use crate::yaair::messages::serializer::Serializer;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::hash::Hash;

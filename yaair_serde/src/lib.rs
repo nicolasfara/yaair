@@ -1,1 +1,1 @@
-pub mod rufi_serde;
+pub mod yaair_serde;
