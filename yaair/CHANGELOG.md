@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0](https://github.com/nicolasfara/yaair/compare/yaair-v0.2.0...yaair-v0.3.0) - 2026-05-07
+
+### Other
+
+- *(example)* adjust API with new refactoring
+
 ## [0.2.0](https://github.com/nicolasfara/yaair/compare/yaair-v0.1.0...yaair-v0.2.0) - 2026-04-07
 
 ### Fixed
