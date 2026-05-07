@@ -12,7 +12,7 @@ where
 {
     local_id: Id,
     network: Net,
-    program: fn(&Env, &mut VM<Id, S>) -> Out,
+    program: fn(&Env, &mut VM<Id, S>) -> Result<Out, AggregateError>,
     vm: VM<Id, S>,
     environment: Env,
 }
@@ -27,7 +27,7 @@ where
         network: Net,
         environment: Env,
         serializer: S,
-        program: fn(&Env, &mut VM<Id, S>) -> Out,
+        program: fn(&Env, &mut VM<Id, S>) -> Result<Out, AggregateError>,
     ) -> Self {
         Self {
             local_id,
@@ -45,7 +45,7 @@ where
     pub fn cycle(&mut self) -> Result<Out, AggregateError> {
         let inbound = self.network.prepare_inbound();
         self.vm.prepare_new_round(inbound);
-        let result = (self.program)(&self.environment, &mut self.vm);
+        let result = (self.program)(&self.environment, &mut self.vm)?;
         let serialized_outbound = self.vm.get_outbound()?;
         self.network.prepare_outbound(serialized_outbound);
         Ok(result)
@@ -98,14 +98,34 @@ mod tests {
 
     #[test]
     fn test_new_and_get_local_id() {
-        let engine = Engine::new(1u32, DummyNetwork, (), &DummySerializer, |_env, _vm| 42u8);
+        let engine = Engine::new(1u32, DummyNetwork, (), &DummySerializer, |_env, _vm| {
+            Ok(42u8)
+        });
         assert_eq!(engine.get_local_id(), 1u32);
     }
 
     #[test]
     fn test_cycle() {
-        let mut engine = Engine::new(2u32, DummyNetwork, (), &DummySerializer, |_env, _vm| 99u8);
+        let mut engine = Engine::new(2u32, DummyNetwork, (), &DummySerializer, |_env, _vm| {
+            Ok(99u8)
+        });
         let result = engine.cycle();
         assert_eq!(result, Ok(99u8));
+    }
+
+    #[test]
+    fn cycle_should_return_program_error() {
+        let mut engine = Engine::new(2u32, DummyNetwork, (), &DummySerializer, |_env, _vm| {
+            Err(AggregateError::DeserializationError(
+                "program failed".into(),
+            ))
+        });
+        let result: Result<u8, AggregateError> = engine.cycle();
+        assert_eq!(
+            result,
+            Err(AggregateError::DeserializationError(
+                "program failed".into()
+            ))
+        );
     }
 }

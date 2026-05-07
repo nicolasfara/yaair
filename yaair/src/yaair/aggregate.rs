@@ -177,7 +177,13 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
         let path = Path::new(self.alignment_stack.current_path());
 
         // Collect neighboring values with improved error handling
-        let neighboring_values = self.get_at_path(&path)?;
+        let neighboring_values = match self.get_at_path(&path) {
+            Ok(values) => values,
+            Err(err) => {
+                self.alignment_stack.unalign();
+                return Err(err);
+            }
+        };
 
         let result = Field::new(value.clone(), neighboring_values);
 
@@ -233,7 +239,13 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, 
             .state
             .get::<V>(&current_path)
             .map_or_else(|| initial.clone(), Clone::clone);
-        let neighboring_values = self.get_at_path(&current_path)?;
+        let neighboring_values = match self.get_at_path(&current_path) {
+            Ok(values) => values,
+            Err(err) => {
+                self.alignment_stack.unalign();
+                return Err(err);
+            }
+        };
         let field = Field::new(previous_state, neighboring_values);
         let updated_state = evolution(self, field);
         self.state
@@ -337,6 +349,28 @@ mod tests {
     }
 
     #[test]
+    fn neighboring_should_restore_alignment_after_deserialization_error() {
+        let serializer = MockSerializer;
+        let path = Path::from("neighboring:0");
+        let inbound_map: Map<u32, ValueTree> =
+            Map::from([(1u32, ValueTree::new(Map::from([(path, vec![0xff])])))]);
+        let mut vm = VM::new(0u32, &serializer);
+        vm.prepare_new_round(InboundMessage::new(inbound_map));
+
+        let result = vm.neighboring(&1u32);
+        assert!(matches!(
+            result,
+            Err(AggregateError::DeserializationError(_))
+        ));
+
+        vm.neighboring(&2u32).unwrap();
+        let outbound = serializer
+            .deserialize::<OutboundMessage<u32>>(&vm.get_outbound().unwrap())
+            .unwrap();
+        assert!(outbound.at(&Path::from("neighboring:1")).is_some());
+    }
+
+    #[test]
     fn branch_should_project_field_on_aligned_devices() {
         let serializer = MockSerializer;
         let path_even = Path::from("branch[true]:0/neighboring:0");
@@ -373,6 +407,29 @@ mod tests {
         let sent_value = to_send.at(&Path::from("share:0")).unwrap();
         let deserialized_sent_value = serializer.deserialize::<i32>(sent_value).unwrap();
         assert_eq!(deserialized_sent_value, initial_value * 2);
+    }
+
+    #[test]
+    fn share_should_restore_alignment_after_deserialization_error() {
+        let serializer = MockSerializer;
+        let path = Path::from("share:0");
+        let inbound_map: Map<u32, ValueTree> =
+            Map::from([(1u32, ValueTree::new(Map::from([(path, vec![0xff])])))]);
+        let mut vm = VM::new(0u32, &serializer);
+        vm.prepare_new_round(InboundMessage::new(inbound_map));
+
+        let initial_value = 1i32;
+        let result = vm.share(&initial_value, |_, field| *field.local());
+        assert!(matches!(
+            result,
+            Err(AggregateError::DeserializationError(_))
+        ));
+
+        vm.share(&initial_value, |_, field| *field.local()).unwrap();
+        let outbound = serializer
+            .deserialize::<OutboundMessage<u32>>(&vm.get_outbound().unwrap())
+            .unwrap();
+        assert!(outbound.at(&Path::from("share:1")).is_some());
     }
 
     #[test]
