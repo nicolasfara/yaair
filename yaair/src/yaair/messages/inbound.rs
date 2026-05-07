@@ -6,6 +6,8 @@ use alloc::collections::{BTreeMap as Map, BTreeSet as Set};
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::hash::Hash;
+
+#[cfg(feature = "std")]
 use std::collections::{HashMap as Map, HashSet as Set};
 
 #[derive(Debug)]

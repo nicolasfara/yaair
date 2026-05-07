@@ -2,6 +2,8 @@
 use alloc::collections::BTreeMap as Map;
 use core::hash::Hash;
 use core::num::Saturating;
+
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -40,16 +42,39 @@ impl<D: Ord + Hash + Copy, V> Field<D, V> {
 
     pub fn min(&self) -> &V
     where
-        V: Ord + Clone,
+        V: Ord,
     {
-        self.overrides.values().min().unwrap_or(&self.default)
+        self.overrides
+            .values()
+            .fold(&self.default, |best, candidate| {
+                core::cmp::min(best, candidate)
+            })
+    }
+
+    pub fn min_without_self(&self) -> Option<&V>
+    where
+        V: Ord,
+    {
+        self.overrides.values().min()
     }
 
     pub fn min_by(&self, mut compare: impl FnMut(&V, &V) -> core::cmp::Ordering) -> &V {
         self.overrides
             .values()
-            .min_by(|a, b| compare(a, b))
-            .unwrap_or(&self.default)
+            .fold(&self.default, |best, candidate| {
+                if compare(candidate, best).is_lt() {
+                    candidate
+                } else {
+                    best
+                }
+            })
+    }
+
+    pub fn min_by_without_self(
+        &self,
+        mut compare: impl FnMut(&V, &V) -> core::cmp::Ordering,
+    ) -> Option<&V> {
+        self.overrides.values().min_by(|a, b| compare(a, b))
     }
 }
 
@@ -142,5 +167,53 @@ mod tests {
 
         assert_eq!(result.local(), &2);
         assert!(result.overrides.is_empty());
+    }
+
+    #[test]
+    fn min_should_include_local_value() {
+        let field = make_field(1, vec![(10, 2), (20, 3)]);
+        assert_eq!(field.min(), &1);
+    }
+
+    #[test]
+    fn min_should_return_neighbor_when_neighbor_is_smallest() {
+        let field = make_field(5, vec![(10, 2), (20, 3)]);
+        assert_eq!(field.min(), &2);
+    }
+
+    #[test]
+    fn min_should_return_local_when_no_neighbors_exist() {
+        let field: Field<i32, i32> = make_field(5, vec![]);
+        assert_eq!(field.min(), &5);
+    }
+
+    #[test]
+    fn min_without_self_should_ignore_local_value() {
+        let field = make_field(1, vec![(10, 2), (20, 3)]);
+        assert_eq!(field.min_without_self(), Some(&2));
+    }
+
+    #[test]
+    fn min_without_self_should_return_none_without_neighbors() {
+        let field: Field<i32, i32> = make_field(1, vec![]);
+        assert_eq!(field.min_without_self(), None);
+    }
+
+    #[test]
+    fn min_by_should_include_local_value() {
+        let field = make_field(3, vec![(10, 1), (20, 2)]);
+        assert_eq!(field.min_by(|a, b| b.cmp(a)), &3);
+    }
+
+    #[test]
+    fn min_by_without_self_should_ignore_local_value() {
+        let field = make_field(3, vec![(10, 1), (20, 2)]);
+        assert_eq!(field.min_by_without_self(|a, b| b.cmp(a)), Some(&2));
+    }
+
+    #[test]
+    fn min_by_without_self_should_return_none_without_neighbors() {
+        let field: Field<i32, i32> = make_field(1, vec![]);
+        assert_eq!(field.min_by_without_self(|a, b| b.cmp(a)), None);
     }
 }

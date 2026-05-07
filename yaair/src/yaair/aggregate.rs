@@ -19,6 +19,8 @@ use alloc::string::String;
 use alloc::vec::Vec;
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
 /// Represents errors that can occur during aggregate computation
@@ -93,18 +95,18 @@ pub trait Aggregate<Id: Ord + Hash + Copy + Serialize> {
 /// Virtual Machine implementation for aggregate computing.
 ///
 /// Manages state, message passing, and alignment for distributed computation.
-pub struct VM<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> {
+pub struct VM<Id: Ord + Hash + Copy + Serialize, S: Serializer> {
     pub local_id: Id,
     state: State,
     inbound: InboundMessage<Id>,
     outbound: OutboundMessage<Id>,
     alignment_stack: AlignmentStack,
-    serializer: &'a S,
+    serializer: S,
 }
 
-impl<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<'a, Id, S> {
+impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
     /// Create a new VM instance with default state.
-    pub fn new(local_id: Id, serializer: &'a S) -> Self {
+    pub fn new(local_id: Id, serializer: S) -> Self {
         Self {
             local_id,
             state: State::default(),
@@ -116,7 +118,7 @@ impl<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<'a, Id, S> {
     }
 
     /// Create a new VM instance with provided state.
-    pub fn new_with_state(local_id: Id, serializer: &'a S, state: State) -> Self {
+    pub fn new_with_state(local_id: Id, serializer: S, state: State) -> Self {
         Self {
             local_id,
             state,
@@ -166,7 +168,7 @@ impl<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<'a, Id, S> {
     }
 }
 
-impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<'_, Id, S> {
+impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, S> {
     fn neighboring<V>(&mut self, value: &V) -> Result<Field<Id, V>, AggregateError>
     where
         V: Serialize + for<'de> Deserialize<'de> + Clone + 'static,
@@ -258,6 +260,7 @@ mod tests {
     use core::any::Any;
 
     // Mock serializer for testing
+    #[derive(Clone, Copy)]
     struct MockSerializer;
 
     impl Serializer for MockSerializer {
@@ -374,7 +377,7 @@ mod tests {
 
     #[test]
     fn share_should_use_last_state_and_neighbors() {
-        fn program(vm: &mut VM<u32, MockSerializer>) -> Result<i32, AggregateError> {
+        fn program(vm: &mut VM<u32, &MockSerializer>) -> Result<i32, AggregateError> {
             let initial_value = 1i32;
             vm.share(&initial_value, |_, field| {
                 let size: i32 = field.size().try_into().unwrap();

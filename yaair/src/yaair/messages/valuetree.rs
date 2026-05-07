@@ -6,6 +6,7 @@ use alloc::collections::BTreeMap as Map;
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
 #[derive(Debug)]

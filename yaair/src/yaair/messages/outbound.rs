@@ -10,6 +10,8 @@ use alloc::vec::Vec;
 
 use core::hash::Hash;
 use serde::{Deserialize, Serialize};
+
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
 #[derive(Debug, Serialize, Deserialize)]

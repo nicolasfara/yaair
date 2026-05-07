@@ -5,6 +5,7 @@ use alloc::boxed::Box;
 #[cfg(not(feature = "std"))]
 use alloc::collections::BTreeMap as Map;
 
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
 use core::any::Any;

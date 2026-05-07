@@ -4,30 +4,30 @@ use crate::yaair::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
-pub struct Engine<'a, Id, Out, Env, S, Net>
+pub struct Engine<Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
-    Net: Network<Id, S>,
+    Net: Network<Id>,
 {
     local_id: Id,
     network: Net,
-    program: fn(&Env, &mut VM<'a, Id, S>) -> Out,
-    vm: VM<'a, Id, S>,
+    program: fn(&Env, &mut VM<Id, S>) -> Out,
+    vm: VM<Id, S>,
     environment: Env,
 }
-impl<'a, Id, Out, Env, S, Net> Engine<'a, Id, Out, Env, S, Net>
+impl<Id, Out, Env, S, Net> Engine<Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
-    Net: Network<Id, S>,
+    Net: Network<Id>,
 {
     pub fn new(
         local_id: Id,
         network: Net,
         environment: Env,
-        serializer: &'a S,
-        program: fn(&Env, &mut VM<'a, Id, S>) -> Out,
+        serializer: S,
+        program: fn(&Env, &mut VM<Id, S>) -> Out,
     ) -> Self {
         Self {
             local_id,
@@ -44,10 +44,10 @@ where
 
     pub fn cycle(&mut self) -> Result<Out, AggregateError> {
         let inbound = self.network.prepare_inbound();
+        self.vm.prepare_new_round(inbound);
         let result = (self.program)(&self.environment, &mut self.vm);
         let serialized_outbound = self.vm.get_outbound()?;
         self.network.prepare_outbound(serialized_outbound);
-        self.vm.prepare_new_round(inbound);
         Ok(result)
     }
 }
@@ -85,10 +85,9 @@ mod tests {
 
     // Dummy Network
     struct DummyNetwork;
-    impl<Id, S> Network<Id, S> for DummyNetwork
+    impl<Id> Network<Id> for DummyNetwork
     where
         Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
-        S: Serializer,
     {
         fn prepare_outbound(&mut self, _outbound_message: Vec<u8>) {}
 

@@ -38,6 +38,8 @@ mod tests {
 
     #[cfg(not(feature = "std"))]
     use alloc::collections::BTreeSet as Set;
+
+    #[cfg(feature = "std")]
     use std::collections::HashSet as Set;
 
     fn make_path(tokens: &[&str]) -> Path {

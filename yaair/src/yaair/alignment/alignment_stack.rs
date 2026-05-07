@@ -14,7 +14,11 @@ use alloc::vec::Vec;
 use core::fmt::Display;
 use core::fmt::Formatter;
 use core::num::Saturating;
+
+#[cfg(feature = "std")]
 use std::collections::HashMap as Map;
+
+#[cfg(feature = "std")]
 use std::collections::VecDeque;
 
 #[derive(Debug, Clone, PartialEq)]
