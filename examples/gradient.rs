@@ -18,8 +18,14 @@ impl GradientEnv {
     }
 }
 
-struct DummyNetwork;
-impl Network<u32, JsonSerializer> for DummyNetwork {
+struct DummyNetwork {}
+#[allow(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    clippy::use_debug,
+    clippy::todo
+)]
+impl Network<u32> for DummyNetwork {
     fn prepare_outbound(&mut self, _outbound_message: Vec<u8>) {}
 
     fn prepare_inbound(&mut self) -> InboundMessage<u32> {
@@ -30,7 +36,9 @@ impl Network<u32, JsonSerializer> for DummyNetwork {
 #[allow(clippy::print_stdout, clippy::print_stderr, clippy::use_debug)]
 pub fn main() {
     let env = GradientEnv { is_source: false };
-    let mut engine = Engine::new(0u32, DummyNetwork, env, JsonSerializer, gradient);
+    let serializer = JsonSerializer;
+    let network = DummyNetwork {};
+    let mut engine = Engine::new(0u32, network, env, &serializer, gradient);
     for _ in 0..10 {
         match engine.cycle() {
             Ok(result) => println!("Gradient result: {result:?}"),
@@ -40,7 +48,7 @@ pub fn main() {
     }
 }
 
-fn gradient(env: &GradientEnv, vm: &mut VM<u32, JsonSerializer>) -> Result<f32, AggregateError> {
+fn gradient(env: &GradientEnv, vm: &mut VM<u32, &JsonSerializer>) -> Result<f32, AggregateError> {
     let initial = f32::MAX;
     vm.share(&initial, |_, field| {
         let distances = field.aligned_map(&env.distances(), |a, b| a + b);
