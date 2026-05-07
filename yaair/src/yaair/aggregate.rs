@@ -93,18 +93,18 @@ pub trait Aggregate<Id: Ord + Hash + Copy + Serialize> {
 /// Virtual Machine implementation for aggregate computing.
 ///
 /// Manages state, message passing, and alignment for distributed computation.
-pub struct VM<Id: Ord + Hash + Copy + Serialize, S: Serializer> {
+pub struct VM<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> {
     pub local_id: Id,
     state: State,
     inbound: InboundMessage<Id>,
     outbound: OutboundMessage<Id>,
     alignment_stack: AlignmentStack,
-    serializer: S,
+    serializer: &'a S,
 }
 
-impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
+impl<'a, Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<'a, Id, S> {
     /// Create a new VM instance with default state.
-    pub fn new(local_id: Id, serializer: S) -> Self {
+    pub fn new(local_id: Id, serializer: &'a S) -> Self {
         Self {
             local_id,
             state: State::default(),
@@ -116,7 +116,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
     }
 
     /// Create a new VM instance with provided state.
-    pub fn new_with_state(local_id: Id, serializer: S, state: State) -> Self {
+    pub fn new_with_state(local_id: Id, serializer: &'a S, state: State) -> Self {
         Self {
             local_id,
             state,
@@ -166,7 +166,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
     }
 }
 
-impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<Id, S> {
+impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> Aggregate<Id> for VM<'_, Id, S> {
     fn neighboring<V>(&mut self, value: &V) -> Result<Field<Id, V>, AggregateError>
     where
         V: Serialize + for<'de> Deserialize<'de> + Clone + 'static,
@@ -277,13 +277,15 @@ mod tests {
 
     #[test]
     fn test_vm_creation() {
-        let vm = VM::new(42u32, MockSerializer);
+        let serializer = MockSerializer;
+        let vm = VM::new(42u32, &serializer);
         assert_eq!(vm.local_id, 42);
     }
 
     #[test]
     fn repeat_should_return_initial_on_first_call() {
-        let mut vm = VM::new(1u32, MockSerializer);
+        let serializer = MockSerializer;
+        let mut vm = VM::new(1u32, &serializer);
         let initial_value = 10;
         let result = vm.repeat(&initial_value, |state, _| state + 1);
         assert_eq!(result, initial_value + 1);
@@ -294,7 +296,8 @@ mod tests {
         let mut state_map: Map<Path, Box<dyn Any>> = Map::new();
         state_map.insert(Path::from("repeat:0"), Box::new(20));
         let state = State::from_snapshot(state_map);
-        let mut vm = VM::new_with_state(1, MockSerializer, state);
+        let serializer = MockSerializer;
+        let mut vm = VM::new_with_state(1, &serializer, state);
         let initial_value = 10;
         let result = vm.repeat(&initial_value, |prev, _| prev + 1);
         assert_eq!(result, 21); // 20 from state + 1 from evolution
@@ -305,7 +308,8 @@ mod tests {
 
     #[test]
     fn neighboring_should_return_a_field_with_only_local_value() {
-        let mut vm = VM::new(1u32, MockSerializer);
+        let serializer = MockSerializer;
+        let mut vm = VM::new(1u32, &serializer);
         let value = 100u32;
         let field = vm.neighboring(&value).unwrap();
         let expected_field = Field::new(value, Map::new());
@@ -322,7 +326,7 @@ mod tests {
         let device_2 = ValueTree::new(Map::from([(path, value_device_2)]));
         let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
-        let mut vm = VM::new(0u32, MockSerializer);
+        let mut vm = VM::new(0u32, &serializer);
         vm.prepare_new_round(inbound);
         let field = vm.neighboring(&1u32).unwrap();
         let expected_field = Field::new(1u32, Map::from([(1u32, 1u32), (2u32, 2u32)]));
@@ -340,7 +344,7 @@ mod tests {
         let device_2 = ValueTree::new(Map::from([(path_even, value_device_2)]));
         let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
-        let mut vm = VM::new(0u32, MockSerializer);
+        let mut vm = VM::new(0u32, &serializer);
         vm.prepare_new_round(inbound);
         let field = vm.branch(
             vm.local_id.is_multiple_of(2),
@@ -354,7 +358,7 @@ mod tests {
     #[test]
     fn share_should_use_initial_value_when_no_previous_state() {
         let serializer = MockSerializer;
-        let mut vm = VM::new(1u32, MockSerializer);
+        let mut vm = VM::new(1u32, &serializer);
         let initial_value = 42;
         let result = vm
             .share(&initial_value, |_, field| field.local() * 2)
@@ -385,7 +389,7 @@ mod tests {
         let device_2 = ValueTree::new(Map::from([(path, value_device_2)]));
         let inbound_map: Map<u32, ValueTree> = Map::from([(1u32, device_1), (2u32, device_2)]);
         let inbound = InboundMessage::new(inbound_map);
-        let mut vm = VM::new(0u32, MockSerializer);
+        let mut vm = VM::new(0u32, &serializer);
         vm.prepare_new_round(inbound);
         let result = program(&mut vm).unwrap();
         assert_eq!(result, 4);

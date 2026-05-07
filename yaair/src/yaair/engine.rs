@@ -4,7 +4,7 @@ use crate::yaair::network::Network;
 use core::hash::Hash;
 use serde::Serialize;
 
-pub struct Engine<Id, Out, Env, S, Net>
+pub struct Engine<'a, Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
@@ -12,11 +12,11 @@ where
 {
     local_id: Id,
     network: Net,
-    program: fn(&Env, &mut VM<Id, S>) -> Out,
-    vm: VM<Id, S>,
+    program: fn(&Env, &mut VM<'a, Id, S>) -> Out,
+    vm: VM<'a, Id, S>,
     environment: Env,
 }
-impl<Id, Out, Env, S, Net> Engine<Id, Out, Env, S, Net>
+impl<'a, Id, Out, Env, S, Net> Engine<'a, Id, Out, Env, S, Net>
 where
     Id: Ord + Hash + Copy + Serialize + for<'de> serde::Deserialize<'de>,
     S: Serializer,
@@ -26,8 +26,8 @@ where
         local_id: Id,
         network: Net,
         environment: Env,
-        serializer: S,
-        program: fn(&Env, &mut VM<Id, S>) -> Out,
+        serializer: &'a S,
+        program: fn(&Env, &mut VM<'a, Id, S>) -> Out,
     ) -> Self {
         Self {
             local_id,
@@ -99,13 +99,13 @@ mod tests {
 
     #[test]
     fn test_new_and_get_local_id() {
-        let engine = Engine::new(1u32, DummyNetwork, (), DummySerializer, |_env, _vm| 42u8);
+        let engine = Engine::new(1u32, DummyNetwork, (), &DummySerializer, |_env, _vm| 42u8);
         assert_eq!(engine.get_local_id(), 1u32);
     }
 
     #[test]
     fn test_cycle() {
-        let mut engine = Engine::new(2u32, DummyNetwork, (), DummySerializer, |_env, _vm| 99u8);
+        let mut engine = Engine::new(2u32, DummyNetwork, (), &DummySerializer, |_env, _vm| 99u8);
         let result = engine.cycle();
         assert_eq!(result, Ok(99u8));
     }
