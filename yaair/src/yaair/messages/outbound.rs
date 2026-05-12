@@ -31,6 +31,12 @@ impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
     }
 }
 
+impl<Id: Ord + Hash + Copy> Into<ValueTree> for OutboundMessage<Id> {
+    fn into(self) -> ValueTree {
+        self.underlying
+    }
+}
+
 // impl<Id> Serialize for OutboundMessage<Id>
 // where
 //     Id: Ord + Hash + Copy + Serialize,
