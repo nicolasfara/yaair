@@ -405,7 +405,7 @@ mod tests {
             .deserialize::<OutboundMessage<u32>>(vm.get_outbound().unwrap().as_slice())
             .unwrap();
         let sent_value = to_send.at(&Path::from("share:0")).unwrap();
-        let deserialized_sent_value = serializer.deserialize::<i32>(sent_value).unwrap();
+        let deserialized_sent_value = serializer.deserialize::<i32>(&sent_value).unwrap();
         assert_eq!(deserialized_sent_value, initial_value * 2);
     }
 

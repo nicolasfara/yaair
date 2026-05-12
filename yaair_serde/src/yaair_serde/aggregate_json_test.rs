@@ -25,6 +25,6 @@ fn test_neighboring_serialization() {
         .deserialize::<OutboundMessage<u32>>(&outbound_bytes)
         .unwrap();
     let val = outbound.at(&"neighboring:0".into()).unwrap();
-    let deserialized: Dummy = serializer.deserialize(val).unwrap();
+    let deserialized: Dummy = serializer.deserialize(&val).unwrap();
     assert_eq!(deserialized, value);
 }
