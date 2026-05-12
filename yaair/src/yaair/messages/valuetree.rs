@@ -10,7 +10,7 @@ use serde::{ser::SerializeStruct, Deserialize, Serialize};
 #[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ValueTree {
     underlying: Map<Path, Vec<u8>>,
 }
