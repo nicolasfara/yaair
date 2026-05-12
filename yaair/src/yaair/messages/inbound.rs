@@ -23,7 +23,7 @@ impl<Id: Ord + Hash + Copy> InboundMessage<Id> {
         self.underlying.get(id)
     }
 
-    pub fn get_at_path(&self, path: &Path) -> Map<Id, Vec<u8>> {
+    pub fn get_at_path(&self, path: &Path) -> Map<Id, &Vec<u8>> {
         self.underlying
             .iter()
             .filter_map(|(id, value_tree)| value_tree.get(path).map(|value| (*id, value)))

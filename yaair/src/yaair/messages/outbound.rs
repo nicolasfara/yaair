@@ -26,7 +26,7 @@ impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
         self.underlying.insert(path.clone(), value);
     }
 
-    pub fn at(&self, path: &Path) -> Option<Vec<u8>> {
+    pub fn at(&self, path: &Path) -> Option<&Vec<u8>> {
         self.underlying.get(path)
     }
 }
@@ -82,7 +82,7 @@ mod tests {
         let serialized = serde_json::to_vec(&outbound).unwrap();
         let deserialized: OutboundMessage<u32> = serde_json::from_slice(&serialized).unwrap();
 
-        assert_eq!(deserialized.at(&path), Some(vec![1, 2, 3]));
+        assert_eq!(deserialized.at(&path), Some(&vec![1, 2, 3]));
         assert_eq!(deserialized.at(&Path::from("outer/inner/leaf")), None);
     }
 
@@ -95,7 +95,7 @@ mod tests {
         let serialized = serde_json::to_vec(&outbound).unwrap();
         let deserialized: OutboundMessage<u32> = serde_json::from_slice(&serialized).unwrap();
 
-        assert_eq!(deserialized.at(&path), Some(vec![4, 5, 6]));
+        assert_eq!(deserialized.at(&path), Some(&vec![4, 5, 6]));
         assert_eq!(deserialized.at(&Path::from("")), None);
     }
 }

@@ -30,8 +30,8 @@ impl ValueTree {
         self.underlying.contains_key(path)
     }
 
-    pub fn get(&self, path: &Path) -> Option<Vec<u8>> {
-        self.underlying.get(path).cloned()
+    pub fn get(&self, path: &Path) -> Option<&Vec<u8>> {
+        self.underlying.get(path)
     }
 
     pub fn insert(&mut self, path: Path, value: Vec<u8>) {
