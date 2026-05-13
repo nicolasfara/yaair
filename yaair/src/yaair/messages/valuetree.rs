@@ -44,7 +44,7 @@ struct SerializedValueTree {
     underlying: Vec<(Path, Vec<u8>)>,
 }
 
-impl<'a> Serialize for ValueTree {
+impl Serialize for ValueTree {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
