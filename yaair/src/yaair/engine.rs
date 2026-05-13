@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn test_cycle() {
-        let mut engine = Engine::new( DummyNetwork(2u32), (), &DummySerializer, |_env, _vm| {
+        let mut engine = Engine::new(DummyNetwork(2u32), (), &DummySerializer, |_env, _vm| {
             Ok(99u8)
         });
         let result = engine.cycle();
@@ -117,7 +117,7 @@ mod tests {
 
     #[test]
     fn cycle_should_return_program_error() {
-        let mut engine = Engine::new( DummyNetwork(2u32), (), &DummySerializer, |_env, _vm| {
+        let mut engine = Engine::new(DummyNetwork(2u32), (), &DummySerializer, |_env, _vm| {
             Err(AggregateError::DeserializationError(
                 "program failed".into(),
             ))

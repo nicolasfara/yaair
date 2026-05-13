@@ -42,7 +42,7 @@ pub fn main() {
     let env = GradientEnv { is_source: false };
     let serializer = JsonSerializer;
     let network = DummyNetwork(0u32);
-    let mut engine = Engine::new( network, env, &serializer, gradient);
+    let mut engine = Engine::new(network, env, &serializer, gradient);
     for _ in 0..10 {
         match engine.cycle() {
             Ok(result) => println!("Gradient result: {result:?}"),
