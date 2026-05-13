@@ -18,7 +18,7 @@ impl GradientEnv {
     }
 }
 
-struct DummyNetwork {}
+struct DummyNetwork(pub u32);
 #[allow(
     clippy::print_stdout,
     clippy::print_stderr,
@@ -26,6 +26,10 @@ struct DummyNetwork {}
     clippy::todo
 )]
 impl Network<u32> for DummyNetwork {
+    fn get_local_id(&self) -> u32 {
+        self.0
+    }
+
     fn prepare_outbound(&mut self, _outbound_message: Vec<u8>) {}
 
     fn prepare_inbound(&mut self) -> InboundMessage<u32> {
@@ -37,8 +41,8 @@ impl Network<u32> for DummyNetwork {
 pub fn main() {
     let env = GradientEnv { is_source: false };
     let serializer = JsonSerializer;
-    let network = DummyNetwork {};
-    let mut engine = Engine::new(0u32, network, env, &serializer, gradient);
+    let network = DummyNetwork(0u32);
+    let mut engine = Engine::new( network, env, &serializer, gradient);
     for _ in 0..10 {
         match engine.cycle() {
             Ok(result) => println!("Gradient result: {result:?}"),
