@@ -22,7 +22,7 @@
         rust-toolchain = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
       in {
         packages.default = pkgs.rustPlatform.buildRustPackage {
-          pname = "rufi";
+          pname = "yaair";
           version = "0.1.0";
           src = ./.;
           cargoLock = {
