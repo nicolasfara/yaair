@@ -29,10 +29,8 @@ impl<Id: Ord + Hash + Copy> OutboundMessage<Id> {
     pub fn at(&self, path: &Path) -> Option<&Vec<u8>> {
         self.underlying.get(path)
     }
-}
 
-impl<Id: Ord + Hash + Copy> Into<ValueTree> for OutboundMessage<Id> {
-    fn into(self) -> ValueTree {
+    pub fn into_inner(self) -> ValueTree {
         self.underlying
     }
 }
