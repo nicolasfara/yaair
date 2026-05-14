@@ -1,6 +1,6 @@
 [package]
 name = "yaair_serde"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = [
     "Nicolas Farabegoli <nicolas.farabegoli@gmail.com>"
@@ -13,7 +13,7 @@ name = "gradient"
 path = "../examples/gradient.rs"
 
 [dependencies]
-yaair = { path = "../yaair", version = "0.3.0" }
+yaair = { path = "../yaair", version = "0.4.0" }
 serde = { version = "1.0.227" }
 serde_json = { version = "1.0.145" }
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2](https://github.com/nicolasfara/yaair/compare/yaair_serde-v0.2.1...yaair_serde-v0.2.2) - 2026-05-14
+
+### Other
+
+- updated the following local packages: yaair
+
 ## [0.2.1](https://github.com/nicolasfara/yaair/compare/yaair_serde-v0.2.0...yaair_serde-v0.2.1) - 2026-05-07
 
 ### Other
