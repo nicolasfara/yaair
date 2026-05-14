@@ -5,11 +5,12 @@ use alloc::collections::BTreeMap as Map;
 
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
+use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 #[cfg(feature = "std")]
 use std::collections::HashMap as Map;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ValueTree {
     underlying: Map<Path, Vec<u8>>,
 }
@@ -29,21 +30,41 @@ impl ValueTree {
         self.underlying.contains_key(path)
     }
 
-    pub fn get(&self, path: &Path) -> Option<Vec<u8>> {
-        self.underlying.get(path).cloned()
+    pub fn get(&self, path: &Path) -> Option<&Vec<u8>> {
+        self.underlying.get(path)
     }
 
-    // pub fn insert<T>(&mut self, path: Path, value: T)
-    // where
-    //     T: Serialize,
-    // {
-    //     match serde_value::to_value(value) {
-    //         Ok(serialized_value) => {
-    //             let _ = self.underlying.insert(path, serialized_value);
-    //         }
-    //         Err(err) => panic!("Failed to serialize value: {}", err),
-    //     }
-    // }
+    pub fn insert(&mut self, path: Path, value: Vec<u8>) {
+        self.underlying.insert(path, value);
+    }
+}
+
+#[derive(Deserialize)]
+struct SerializedValueTree {
+    underlying: Vec<(Path, Vec<u8>)>,
+}
+
+impl Serialize for ValueTree {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("SerializedValueTree", 1)?;
+        let underlying = self.underlying.iter().collect::<Vec<_>>();
+        state.serialize_field("underlying", &underlying)?;
+        state.end()
+    }
+}
+
+impl<'de> Deserialize<'de> for ValueTree {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let serialized_valuetree = SerializedValueTree::deserialize(deserializer)?;
+        let underlying = serialized_valuetree.underlying.into_iter().collect();
+        Ok(Self { underlying })
+    }
 }
 
 // #[cfg(test)]

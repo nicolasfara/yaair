@@ -153,7 +153,7 @@ impl<Id: Ord + Hash + Copy + Serialize, S: Serializer> VM<Id, S> {
     {
         let mut result = Map::new();
         for (id, elem) in self.inbound.get_at_path(path) {
-            match self.serializer.deserialize::<V>(&elem) {
+            match self.serializer.deserialize::<V>(elem) {
                 Ok(deserialized_value) => {
                     result.insert(id, deserialized_value);
                 }
