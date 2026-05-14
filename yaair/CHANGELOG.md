@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0](https://github.com/nicolasfara/yaair/compare/yaair-v0.3.0...yaair-v0.4.0) - 2026-05-14
+
+### Added
+
+- make network aware of the local ID and changed the serialization strategy ([#36](https://github.com/nicolasfara/yaair/pull/36))
+
 ## [0.3.0](https://github.com/nicolasfara/yaair/compare/yaair-v0.2.0...yaair-v0.3.0) - 2026-05-07
 
 ### Other
